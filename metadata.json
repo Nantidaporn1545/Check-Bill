@@ -1,0 +1,6 @@
+{
+  "name": "Housing Allowance Tracker",
+  "description": "ระบบตรวจสอบประวัติการเบิกเงินสวัสดิการค่าที่พักพนักงาน ดึงข้อมูลจาก Google Sheets แบบเรียลไทม์",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

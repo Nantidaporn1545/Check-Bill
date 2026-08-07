@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --color-wise-blue: #1A475F;
+  --color-proactive-blue: #7FA1B6;
+  --color-well-life-beige: #D3D1C6;
+  --color-brand-white: #FFFFFF;
+}
+
+body {
+  background-color: #0c2331;
+  color: #D3D1C6;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
