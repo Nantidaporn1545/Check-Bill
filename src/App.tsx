@@ -1,24 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { HousingAllowanceRecord, EmployeeInfo } from './types';
+import { HousingAllowanceRecord, EmployeeInfo, SheetConfig } from './types';
 import {
   fetchSheetData,
   getEmployeeSummary,
   updateRecordBillStatus,
 } from './services/sheetsService';
+import { DEFAULT_SHEET_CONFIG } from './data/mockData';
 import { Header } from './components/Header';
 import { PageSearch } from './components/PageSearch';
 import { PageEmployeeDetail } from './components/PageEmployeeDetail';
 import { ReceiptUploadModal } from './components/ReceiptUploadModal';
 import { RecordDetailModal } from './components/RecordDetailModal';
+import { GoogleSheetSyncModal } from './components/GoogleSheetSyncModal';
+import { AdminAuthModal } from './components/AdminAuthModal';
 
 export default function App() {
   const [records, setRecords] = useState<HousingAllowanceRecord[]>([]);
+  const [sheetConfig, setSheetConfig] = useState<SheetConfig>(DEFAULT_SHEET_CONFIG);
   const [currentPage, setCurrentPage] = useState<'search' | 'detail'>('search');
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
+
+  // Admin Auth state
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
+    return sessionStorage.getItem('is_admin_logged_in') === 'true';
+  });
+  const [adminPin, setAdminPin] = useState<string>(() => {
+    return localStorage.getItem('admin_pin_code') || '1234';
+  });
+  const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
 
   // Modals state
   const [uploadModalRecord, setUploadModalRecord] = useState<HousingAllowanceRecord | null>(null);
   const [detailModalRecord, setDetailModalRecord] = useState<HousingAllowanceRecord | null>(null);
+  const [isSheetModalOpen, setIsSheetModalOpen] = useState(false);
 
   // Loading & sync state
   const [isSyncing, setIsSyncing] = useState(false);
@@ -30,6 +44,27 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  const handleAdminSuccess = () => {
+    setIsAdmin(true);
+    sessionStorage.setItem('is_admin_logged_in', 'true');
+    setIsAdminAuthModalOpen(false);
+    setIsSheetModalOpen(true);
+    showToast('เข้าสู่ระบบผู้ดูแลระบบสำเร็จ');
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+    sessionStorage.removeItem('is_admin_logged_in');
+    setIsSheetModalOpen(false);
+    showToast('ออกจากระบบผู้ดูแลระบบแล้ว');
+  };
+
+  const handleUpdatePin = (newPin: string) => {
+    setAdminPin(newPin);
+    localStorage.setItem('admin_pin_code', newPin);
+    showToast('เปลี่ยนรหัส PIN ผู้ดูแลระบบสำเร็จ');
+  };
+
   // Initial load
   useEffect(() => {
     loadData();
@@ -39,6 +74,7 @@ export default function App() {
     setIsSyncing(true);
     const data = await fetchSheetData();
     setRecords(data.records);
+    if (data.config) setSheetConfig(data.config);
     setIsSyncing(false);
   };
 
@@ -46,6 +82,12 @@ export default function App() {
     setIsSyncing(true);
     await loadData();
     showToast('ดึงข้อมูลล่าสุดเรียบร้อยแล้ว');
+  };
+
+  const handleSyncSuccess = (newConfig: SheetConfig, newRecords: HousingAllowanceRecord[]) => {
+    setSheetConfig(newConfig);
+    setRecords(newRecords);
+    showToast(`อัปเดตข้อมูลสำเร็จ รวม ${newRecords.length} รายการ`);
   };
 
   // Search employee ID from Page 1 -> Page 2
@@ -75,6 +117,17 @@ export default function App() {
         currentPage={currentPage}
         onNavigateHome={() => setCurrentPage('search')}
         isSyncing={isSyncing}
+        onOpenSheetModal={() => {
+          if (isAdmin) {
+            setIsSheetModalOpen(true);
+          } else {
+            setIsAdminAuthModalOpen(true);
+          }
+        }}
+        isCustomSheetConnected={sheetConfig.isCustom}
+        isAdmin={isAdmin}
+        onOpenAdminAuthModal={() => setIsAdminAuthModalOpen(true)}
+        onAdminLogout={handleAdminLogout}
       />
 
       {/* Main Page Area */}
@@ -86,6 +139,9 @@ export default function App() {
             onSearch={handleSearchEmployee}
             onRefresh={handleRefresh}
             isSyncing={isSyncing}
+            onOpenSheetModal={() => setIsSheetModalOpen(true)}
+            isAdmin={isAdmin}
+            onOpenAdminAuthModal={() => setIsAdminAuthModalOpen(true)}
           />
         ) : (
           <PageEmployeeDetail
@@ -116,6 +172,23 @@ export default function App() {
       )}
 
       {/* Modals */}
+      <AdminAuthModal
+        isOpen={isAdminAuthModalOpen}
+        onClose={() => setIsAdminAuthModalOpen(false)}
+        onSuccess={handleAdminSuccess}
+        currentPin={adminPin}
+        onUpdatePin={handleUpdatePin}
+        isAdmin={isAdmin}
+      />
+
+      <GoogleSheetSyncModal
+        isOpen={isSheetModalOpen}
+        onClose={() => setIsSheetModalOpen(false)}
+        config={sheetConfig}
+        totalRecordsCount={records.length}
+        onSyncSuccess={handleSyncSuccess}
+      />
+
       <ReceiptUploadModal
         isOpen={!!uploadModalRecord}
         onClose={() => setUploadModalRecord(null)}
@@ -133,3 +206,4 @@ export default function App() {
     </div>
   );
 }
+
