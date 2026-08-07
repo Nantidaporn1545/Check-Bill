@@ -56,30 +56,30 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
     switch (status) {
       case 'ส่งแล้ว':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 text-xs font-semibold">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold shadow-2xs">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
             <span>ส่งแล้ว</span>
           </span>
         );
       case 'รอดำเนินการ':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/50 text-xs font-semibold">
-            <Clock className="w-3.5 h-3.5 text-sky-400" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-xs font-semibold shadow-2xs">
+            <Clock className="w-3.5 h-3.5 text-sky-600" />
             <span>รอดำเนินการ</span>
           </span>
         );
       case 'เกินกำหนด':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/50 text-xs font-semibold">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold shadow-2xs">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
             <span>เกินกำหนด</span>
           </span>
         );
       case 'ยังไม่ส่ง':
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/50 text-xs font-semibold">
-            <XCircle className="w-3.5 h-3.5 text-rose-400" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold shadow-2xs">
+            <XCircle className="w-3.5 h-3.5 text-rose-600" />
             <span>ยังไม่ส่ง</span>
           </span>
         );
@@ -94,23 +94,23 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
     <div className="space-y-6 animate-fadeIn pb-16">
       
       {/* Employee Profile Card */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#1A475F] to-[#103042] border border-[#7FA1B6]/40 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#7FA1B6]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-xs relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-sky-50 rounded-full blur-3xl pointer-events-none" />
         
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
           
           <div className="flex items-center gap-4 sm:gap-6">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#7FA1B6]/20 border border-[#7FA1B6]/50 text-[#FFFFFF] flex items-center justify-center font-bold text-2xl sm:text-3xl shadow-xl shrink-0">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-sky-600 text-white flex items-center justify-center font-bold text-2xl sm:text-3xl shadow-sm shrink-0">
               {employeeInfo.firstName.charAt(0)}
             </div>
 
-            <div className="space-y-1">
-              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-[#0c2331]/80 border border-[#7FA1B6]/40 text-[#7FA1B6] text-xs font-mono font-bold">
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 text-xs font-mono font-semibold">
                 <span>รหัสพนักงาน:</span>
-                <span className="text-[#FFFFFF] font-extrabold">{employeeInfo.employeeId}</span>
+                <span className="text-slate-900 font-extrabold">{employeeInfo.employeeId}</span>
               </div>
               
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#FFFFFF] tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                 {employeeInfo.firstName} {employeeInfo.lastName}
               </h2>
             </div>
@@ -122,52 +122,52 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
       {/* Summary Badges Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
         
-        <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 flex items-center justify-between shadow-2xs">
           <div>
-            <div className="text-xs text-emerald-200/90 font-medium">ส่งใบเสร็จแล้ว</div>
-            <div className="text-xl font-bold text-emerald-300 mt-0.5">{employeeInfo.submittedCount} รายการ</div>
+            <div className="text-xs text-emerald-800 font-medium">ส่งใบเสร็จแล้ว</div>
+            <div className="text-xl font-bold text-emerald-900 mt-0.5">{employeeInfo.submittedCount} รายการ</div>
           </div>
-          <CheckCircle2 className="w-8 h-8 text-emerald-400/40" />
+          <CheckCircle2 className="w-8 h-8 text-emerald-500/40" />
         </div>
 
-        <div className="p-4 rounded-2xl bg-sky-950/30 border border-sky-500/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-200/80 flex items-center justify-between shadow-2xs">
           <div>
-            <div className="text-xs text-sky-200/90 font-medium">รอดำเนินการ</div>
-            <div className="text-xl font-bold text-sky-300 mt-0.5">{employeeInfo.pendingCount} รายการ</div>
+            <div className="text-xs text-sky-800 font-medium">รอดำเนินการ</div>
+            <div className="text-xl font-bold text-sky-900 mt-0.5">{employeeInfo.pendingCount} รายการ</div>
           </div>
-          <Clock className="w-8 h-8 text-sky-400/40" />
+          <Clock className="w-8 h-8 text-sky-500/40" />
         </div>
 
-        <div className="p-4 rounded-2xl bg-rose-950/30 border border-rose-500/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-rose-50/60 border border-rose-200/80 flex items-center justify-between shadow-2xs">
           <div>
-            <div className="text-xs text-rose-200/90 font-medium">ยังไม่ส่งใบเสร็จ</div>
-            <div className="text-xl font-bold text-rose-300 mt-0.5">{employeeInfo.unsubmittedCount} รายการ</div>
+            <div className="text-xs text-rose-800 font-medium">ยังไม่ส่งใบเสร็จ</div>
+            <div className="text-xl font-bold text-rose-900 mt-0.5">{employeeInfo.unsubmittedCount} รายการ</div>
           </div>
-          <XCircle className="w-8 h-8 text-rose-400/40" />
+          <XCircle className="w-8 h-8 text-rose-500/40" />
         </div>
 
-        <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 flex items-center justify-between shadow-2xs">
           <div>
-            <div className="text-xs text-amber-200/90 font-medium">เกินกำหนดส่ง</div>
-            <div className="text-xl font-bold text-amber-300 mt-0.5">{employeeInfo.overdueCount} รายการ</div>
+            <div className="text-xs text-amber-800 font-medium">เกินกำหนดส่ง</div>
+            <div className="text-xl font-bold text-amber-900 mt-0.5">{employeeInfo.overdueCount} รายการ</div>
           </div>
-          <AlertTriangle className="w-8 h-8 text-amber-400/40" />
+          <AlertTriangle className="w-8 h-8 text-amber-500/40" />
         </div>
 
       </div>
 
       {/* History Table Container */}
-      <div className="bg-[#1A475F]/30 border border-[#7FA1B6]/30 rounded-3xl shadow-xl overflow-hidden">
+      <div className="bg-white border border-slate-200/80 rounded-3xl shadow-xs overflow-hidden">
         
         {/* Table Filter & Search Controls Header */}
-        <div className="p-5 border-b border-[#7FA1B6]/30 bg-[#103042] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div className="p-5 border-b border-slate-200/80 bg-slate-50/60 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           
           <div className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[#7FA1B6]" />
-            <h3 className="font-bold text-[#FFFFFF] text-base sm:text-lg">
+            <FileText className="w-5 h-5 text-sky-600" />
+            <h3 className="font-bold text-slate-900 text-base sm:text-lg">
               ตารางรายการประวัติการเบิกค่าที่พัก
             </h3>
-            <span className="text-xs text-[#7FA1B6] bg-[#1A475F]/60 px-2 py-0.5 rounded-full font-mono border border-[#7FA1B6]/30">
+            <span className="text-xs text-sky-700 bg-sky-100 px-2.5 py-0.5 rounded-full font-mono font-semibold border border-sky-200">
               ({filteredRecords.length})
             </span>
           </div>
@@ -176,26 +176,26 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
             
             {/* Search filter */}
             <div className="relative flex-1 sm:flex-none sm:w-48">
-              <Search className="w-4 h-4 text-[#7FA1B6] absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               <input
                 type="text"
                 value={tableSearch}
                 onChange={(e) => setTableSearch(e.target.value)}
                 placeholder="ค้นหาในตาราง..."
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-[#0c2331] border border-[#7FA1B6]/40 text-xs text-[#FFFFFF] placeholder-[#7FA1B6]/60 focus:outline-none focus:border-[#7FA1B6]"
+                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
               />
             </div>
 
             {/* Filter Status */}
-            <div className="flex items-center gap-1 bg-[#0c2331] p-1 rounded-xl border border-[#7FA1B6]/30 text-xs">
+            <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 text-xs">
               {['ทั้งหมด', 'ส่งแล้ว', 'รอดำเนินการ', 'ยังไม่ส่ง', 'เกินกำหนด'].map((st) => (
                 <button
                   key={st}
                   onClick={() => setSelectedStatus(st)}
                   className={`px-2.5 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
                     selectedStatus === st
-                      ? 'bg-[#1A475F] text-[#FFFFFF] border border-[#7FA1B6]/40 shadow-sm'
-                      : 'text-[#D3D1C6] hover:text-[#FFFFFF] hover:bg-[#1A475F]/40'
+                      ? 'bg-sky-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
                   {st}
@@ -208,10 +208,10 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
               <select
                 value={selectedSite}
                 onChange={(e) => setSelectedSite(e.target.value)}
-                className="px-3 py-1.5 rounded-xl bg-[#0c2331] border border-[#7FA1B6]/40 text-xs text-[#D3D1C6] focus:outline-none focus:border-[#7FA1B6]"
+                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 focus:outline-none focus:border-sky-500"
               >
                 {availableSites.map((site) => (
-                  <option key={site} value={site} className="bg-[#0c2331] text-[#D3D1C6]">
+                  <option key={site} value={site} className="bg-white text-slate-800">
                     {site === 'ทั้งหมด' ? 'ไซต์งานทั้งหมด' : site}
                   </option>
                 ))}
@@ -226,7 +226,7 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-[#7FA1B6]/30 bg-[#0c2331] text-[#7FA1B6] text-xs font-semibold uppercase tracking-wider">
+              <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider">
                 <th className="py-3.5 px-4 sm:px-6">วันที่โอน</th>
                 <th className="py-3.5 px-4 sm:px-6">รายการ</th>
                 <th className="py-3.5 px-4 sm:px-6">เลขทะเบียนรถ</th>
@@ -235,60 +235,60 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
                 <th className="py-3.5 px-4 sm:px-6 text-center">สถานะบิล</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#7FA1B6]/20 text-sm">
+            <tbody className="divide-y divide-slate-100 text-sm">
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-[#D3D1C6]/70">
+                  <td colSpan={6} className="py-12 text-center text-slate-500">
                     <p className="text-base font-medium">ไม่พบรายการที่ตรงกับเงื่อนไขการค้นหา</p>
-                    <p className="text-xs mt-1 text-[#7FA1B6]">ลองเปลี่ยนตัวกรองสถานะหรือลบข้อความค้นหา</p>
+                    <p className="text-xs mt-1 text-slate-400">ลองเปลี่ยนตัวกรองสถานะหรือลบข้อความค้นหา</p>
                   </td>
                 </tr>
               ) : (
                 filteredRecords.map((record) => (
                   <tr
                     key={record.id}
-                    className="hover:bg-[#1A475F]/30 transition-colors group cursor-pointer"
+                    className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                     onClick={() => onOpenDetailModal(record)}
                   >
                     {/* วันที่โอน */}
-                    <td className="py-4 px-4 sm:px-6 text-[#D3D1C6] font-mono text-xs whitespace-nowrap">
+                    <td className="py-4 px-4 sm:px-6 text-slate-600 font-mono text-xs whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-[#7FA1B6] shrink-0" />
+                        <Calendar className="w-4 h-4 text-sky-500 shrink-0" />
                         <span>{formatThaiBEDate(record.transferDate)}</span>
                       </div>
                     </td>
 
                     {/* รายการ */}
-                    <td className="py-4 px-4 sm:px-6 text-[#FFFFFF] font-medium">
+                    <td className="py-4 px-4 sm:px-6 text-slate-900 font-medium">
                       <div>{record.welfareItem}</div>
                       {record.note && (
-                        <div className="text-xs text-[#D3D1C6]/80 mt-0.5 line-clamp-1">
+                        <div className="text-xs text-slate-500 mt-0.5 line-clamp-1">
                           {record.note}
                         </div>
                       )}
                     </td>
 
                     {/* เลขทะเบียนรถ */}
-                    <td className="py-4 px-4 sm:px-6 text-[#D3D1C6] text-xs whitespace-nowrap">
+                    <td className="py-4 px-4 sm:px-6 text-slate-600 text-xs whitespace-nowrap">
                       {record.vehiclePlate ? (
-                        <span className="px-2.5 py-1 rounded-lg bg-[#0c2331] border border-[#7FA1B6]/40 text-[#FFFFFF] font-mono text-xs font-semibold">
+                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-800 font-mono text-xs font-semibold">
                           🚗 {record.vehiclePlate}
                         </span>
                       ) : (
-                        <span className="text-[#7FA1B6]/40">-</span>
+                        <span className="text-slate-300">-</span>
                       )}
                     </td>
 
                     {/* ไซต์งาน */}
-                    <td className="py-4 px-4 sm:px-6 text-[#D3D1C6]">
+                    <td className="py-4 px-4 sm:px-6 text-slate-600">
                       <div className="flex items-center gap-1.5">
-                        <Building2 className="w-3.5 h-3.5 text-[#7FA1B6] shrink-0" />
+                        <Building2 className="w-3.5 h-3.5 text-sky-500 shrink-0" />
                         <span className="text-xs">{record.siteLocation}</span>
                       </div>
                     </td>
 
                     {/* จำนวนเงินที่โอน */}
-                    <td className="py-4 px-4 sm:px-6 text-right font-bold text-[#FFFFFF] font-mono text-base whitespace-nowrap">
+                    <td className="py-4 px-4 sm:px-6 text-right font-bold text-slate-900 font-mono text-base whitespace-nowrap">
                       {formatThaiCurrency(record.amount)}
                     </td>
 
@@ -304,7 +304,7 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
         </div>
 
         {/* Table Footer */}
-        <div className="p-4 bg-[#103042] border-t border-[#7FA1B6]/30 flex items-center justify-between text-xs text-[#D3D1C6]">
+        <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
           <div>แสดง {filteredRecords.length} จากทั้งหมด {employeeInfo.records.length} รายการ</div>
         </div>
 
