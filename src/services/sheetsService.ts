@@ -1,6 +1,7 @@
 import { HousingAllowanceRecord, EmployeeInfo, SheetConfig } from '../types';
 import { MOCK_HOUSING_RECORDS, DEFAULT_SHEET_CONFIG } from '../data/mockData';
 import { parseDateToTimestamp } from '../utils/formatters';
+import { fetchCsvClientSide, parseCsvToRecords, isHtmlContent } from '../utils/csvParser';
 
 const LOCAL_STORAGE_RECORDS_KEY = 'housing_allowance_records_v1';
 const LOCAL_STORAGE_CONFIG_KEY = 'housing_allowance_config_v1';
@@ -97,6 +98,7 @@ export async function fetchSheetData(): Promise<{ config: SheetConfig; records: 
 
 // Connect & parse a Google Sheet URL
 export async function syncCustomSheetUrl(sheetUrl: string, csvText?: string): Promise<{ success: boolean; config: SheetConfig; records: HousingAllowanceRecord[]; message: string }> {
+  // 1. Try server endpoint first
   try {
     const response = await fetch('/api/sheets/parse', {
       method: 'POST',
@@ -105,46 +107,70 @@ export async function syncCustomSheetUrl(sheetUrl: string, csvText?: string): Pr
     });
 
     const contentType = response.headers.get('content-type');
-    let data: any = null;
+    if (response.ok && contentType && contentType.includes('application/json')) {
+      const data = await response.json();
+      if (data && data.records) {
+        saveLocalRecords(data.records);
+        saveLocalConfig(data.config);
+        return {
+          success: true,
+          config: data.config,
+          records: data.records,
+          message: data.message || 'เชื่อมต่อข้อมูลเรียบร้อย',
+        };
+      }
+    }
+  } catch (serverErr) {
+    console.warn('Backend API unavailable, falling back to client-side parsing:', serverErr);
+  }
 
-    if (contentType && contentType.includes('application/json')) {
-      try {
-        data = await response.json();
-      } catch (e) {
-        throw new Error('ไม่สามารถอ่านข้อมูลตอบกลับจากเซิร์ฟเวอร์ได้ (รูปแบบ JSON ไม่ถูกต้อง)');
-      }
-    } else {
-      const textResp = await response.text();
-      if (textResp.includes('The page') || textResp.includes('<!DOCTYPE') || textResp.includes('<html')) {
-        throw new Error('ไม่สามารถเข้าถึง Google Sheet ได้ โปรดตรวจสอบว่าได้แชร์สิทธิ์เป็น "ทุกคนที่มีลิงก์" (Anyone with the link)');
-      }
-      throw new Error('ได้รับข้อมูลตอบกลับที่ไม่ใช่ JSON จากเซิร์ฟเวอร์');
+  // 2. Client-side fallback parsing (for Vercel static hosting or offline mode)
+  try {
+    let rawCsv = csvText;
+
+    if (!rawCsv && sheetUrl) {
+      rawCsv = await fetchCsvClientSide(sheetUrl) || undefined;
     }
 
-    if (!response.ok || !data) {
-      throw new Error(data?.error || 'ไม่สามารถดึงข้อมูลจาก Google Sheet ได้');
+    if (!rawCsv || isHtmlContent(rawCsv)) {
+      throw new Error('ไม่สามารถเข้าถึง Google Sheet ได้ โปรดตรวจสอบว่าเปิดสิทธิ์แชร์เป็น "ทุกคนที่มีลิงก์" (Anyone with the link)');
     }
 
-    saveLocalRecords(data.records);
-    saveLocalConfig(data.config);
+    const records = parseCsvToRecords(rawCsv);
+    if (!records || records.length === 0) {
+      throw new Error('ไม่พบข้อมูลพนักงานใน Google Sheet หรือรูปแบบคอลัมน์ไม่ถูกต้อง');
+    }
+
+    const newConfig: SheetConfig = {
+      sheetUrl,
+      sheetId: sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/)?.[1] || 'custom',
+      sheetName: 'Google Sheet (เชื่อมต่อโดยตรง)',
+      lastSyncTime: new Date().toISOString(),
+      status: 'connected',
+      isCustom: true,
+    };
+
+    saveLocalRecords(records);
+    saveLocalConfig(newConfig);
 
     return {
       success: true,
-      config: data.config,
-      records: data.records,
-      message: data.message || 'เชื่อมต่อข้อมูลเรียบร้อย',
+      config: newConfig,
+      records,
+      message: `เชื่อมต่อสำเร็จ! ดึงข้อมูลพนักงาน ${records.length} รายการเรียบร้อย`,
     };
-  } catch (err: any) {
-    console.error('syncCustomSheetUrl error:', err);
+  } catch (clientErr: any) {
+    console.error('Client-side sync error:', clientErr);
     return {
       success: false,
       config: {
         ...DEFAULT_SHEET_CONFIG,
+        sheetUrl,
         status: 'error',
-        errorMessage: err.message,
+        errorMessage: clientErr.message,
       },
       records: getLocalRecords() || MOCK_HOUSING_RECORDS,
-      message: err.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
+      message: clientErr.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ',
     };
   }
 }
