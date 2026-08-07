@@ -4,6 +4,7 @@ import { createServer as createViteServer } from 'vite';
 import Papa from 'papaparse';
 import { MOCK_HOUSING_RECORDS, DEFAULT_SHEET_CONFIG } from './src/data/mockData.js';
 import { HousingAllowanceRecord, BillStatus } from './src/types.js';
+import { formatThaiBEDate, parseThaiAmount } from './src/utils/formatters.js';
 
 const app = express();
 const PORT = 3000;
@@ -17,13 +18,15 @@ let currentSheetConfig = { ...DEFAULT_SHEET_CONFIG };
 // Helper to normalize Thai column names
 function normalizeColumnKey(key: string): string {
   const clean = key.trim().toLowerCase();
+  if (clean.includes('ทะเบียน') || clean.includes('รถ') || clean.includes('plate') || clean.includes('vehicle')) return 'vehiclePlate';
+  if (clean.includes('ผู้เบิก') || (clean.includes('ชื่อ') && clean.includes('พนักงาน'))) return 'fullName';
   if (clean.includes('รหัส') || clean.includes('emp') || clean.includes('code')) return 'employeeId';
   if (clean.includes('ชื่อ') && !clean.includes('นามสกุล')) return 'firstName';
   if (clean.includes('นามสกุล') || clean.includes('surname') || clean.includes('last')) return 'lastName';
-  if (clean.includes('วันที่') || clean.includes('โอน') || clean.includes('date')) return 'transferDate';
+  if (clean.includes('จำนวนเงิน') || clean.includes('ยอดเงิน') || clean.includes('amount') || (clean.includes('เงิน') && !clean.includes('เบิก'))) return 'amount';
+  if (clean.includes('วันที่') || clean.includes('date') || clean === 'โอน' || clean.includes('วันที่โอน') || clean.includes('โอนเมื่อ')) return 'transferDate';
   if (clean.includes('สวัสดิการ') || clean.includes('รายการ') || clean.includes('item') || clean.includes('welfare')) return 'welfareItem';
   if (clean.includes('ไซส์') || clean.includes('ไซต์') || clean.includes('site') || clean.includes('โครงการ') || clean.includes('สถานที่')) return 'siteLocation';
-  if (clean.includes('จำนวนเงิน') || clean.includes('ยอดเงิน') || clean.includes('เงิน') || clean.includes('amount')) return 'amount';
   if (clean.includes('สถานะ') || clean.includes('บิล') || clean.includes('status')) return 'billStatus';
   if (clean.includes('แผนก') || clean.includes('dept') || clean.includes('department')) return 'department';
   if (clean.includes('ตำแหน่ง') || clean.includes('position')) return 'position';
@@ -35,15 +38,65 @@ function normalizeColumnKey(key: string): string {
 function normalizeBillStatus(rawStatus: string): BillStatus {
   if (!rawStatus) return 'ยังไม่ส่ง';
   const str = String(rawStatus).trim();
-  if (str.includes('ส่งแล้ว') || str.includes('เรียบร้อย') || str.includes('อนุมัติ') || str.includes('submitted') || str.includes('done')) {
+
+  if (str === 'ส่งแล้ว' || str === 'ยังไม่ส่ง' || str === 'รอดำเนินการ' || str === 'เกินกำหนด') {
+    return str as BillStatus;
+  }
+
+  const lower = str.toLowerCase();
+
+  if (
+    str.includes('ส่งแล้ว') ||
+    str.includes('เรียบร้อย') ||
+    str.includes('อนุมัติ') ||
+    str.includes('สำเร็จ') ||
+    str.includes('โอนแล้ว') ||
+    str.includes('จ่ายแล้ว') ||
+    str.includes('เสร็จ') ||
+    str.includes('รับแล้ว') ||
+    lower.includes('submitted') ||
+    lower.includes('done') ||
+    lower.includes('approved') ||
+    lower.includes('paid') ||
+    lower.includes('complete') ||
+    lower.includes('success')
+  ) {
     return 'ส่งแล้ว';
   }
-  if (str.includes('รอ') || str.includes('pending') || str.includes('ตรวจ')) {
+
+  if (
+    str.includes('รอ') ||
+    str.includes('ดำเนินการ') ||
+    str.includes('ตรวจ') ||
+    str.includes('กำลัง') ||
+    lower.includes('pending') ||
+    lower.includes('process') ||
+    lower.includes('waiting')
+  ) {
     return 'รอดำเนินการ';
   }
-  if (str.includes('เกิน') || str.includes('ช้า') || str.includes('overdue') || str.includes('late')) {
+
+  if (
+    str.includes('เกิน') ||
+    str.includes('ช้า') ||
+    str.includes('ค้าง') ||
+    str.includes('หมดอายุ') ||
+    lower.includes('overdue') ||
+    lower.includes('late') ||
+    lower.includes('expire')
+  ) {
     return 'เกินกำหนด';
   }
+
+  if (
+    str.includes('ยัง') ||
+    str.includes('ไม่') ||
+    lower.includes('not') ||
+    lower.includes('unsubmitted')
+  ) {
+    return 'ยังไม่ส่ง';
+  }
+
   return 'ยังไม่ส่ง';
 }
 
@@ -77,13 +130,104 @@ function extractGoogleSheetCsvUrl(inputUrl: string): string {
   return url;
 }
 
+// Helper to convert CSV string into HousingAllowanceRecord array
+function parseCsvToRecords(rawCsv: string): HousingAllowanceRecord[] {
+  const parsed = Papa.parse<Record<string, string>>(rawCsv, {
+    header: true,
+    skipEmptyLines: true,
+  });
+
+  if (!parsed.data || parsed.data.length === 0) return [];
+
+  return parsed.data.map((row, index) => {
+    const normalizedRow: Record<string, string> = {};
+    Object.keys(row).forEach((colKey) => {
+      const normKey = normalizeColumnKey(colKey);
+      normalizedRow[normKey] = row[colKey] ? String(row[colKey]).trim() : '';
+    });
+
+    const empId = normalizedRow['employeeId'] || `EMP-${1000 + index}`;
+    
+    let fName = normalizedRow['firstName'];
+    let lName = normalizedRow['lastName'];
+    if (normalizedRow['fullName']) {
+      const parts = normalizedRow['fullName'].split(/\s+/);
+      fName = parts[0] || 'พนักงาน';
+      lName = parts.slice(1).join(' ') || 'ทั่วไป';
+    }
+    if (!fName) fName = 'พนักงาน';
+    if (!lName) lName = 'ทั่วไป';
+
+    const amountVal = parseThaiAmount(normalizedRow['amount']);
+    const rawDate = normalizedRow['transferDate'] || new Date().toISOString().split('T')[0];
+    const transferDateVal = formatThaiBEDate(rawDate);
+    const status = normalizeBillStatus(normalizedRow['billStatus']);
+
+    return {
+      id: `SHEET-REC-${index + 1}`,
+      employeeId: empId.toUpperCase(),
+      firstName: fName,
+      lastName: lName,
+      department: normalizedRow['department'] || 'ฝ่ายปฏิบัติการ',
+      position: normalizedRow['position'] || 'พนักงาน',
+      transferDate: transferDateVal,
+      welfareItem: normalizedRow['welfareItem'] || 'ค่าที่พักประจำเดือน',
+      siteLocation: normalizedRow['siteLocation'] || 'ไซต์งานทั่วไป',
+      vehiclePlate: normalizedRow['vehiclePlate'] || '',
+      amount: amountVal,
+      billStatus: status,
+      note: normalizedRow['note'] || '',
+      lastUpdated: new Date().toISOString(),
+    };
+  });
+}
+
+// Helper to auto-sync from Google Sheet URL
+async function fetchLatestFromGoogleSheet(sheetUrl: string): Promise<HousingAllowanceRecord[] | null> {
+  const targetCsvUrl = extractGoogleSheetCsvUrl(sheetUrl);
+  if (!targetCsvUrl) return null;
+
+  try {
+    const response = await fetch(targetCsvUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+    });
+
+    if (!response.ok) return null;
+    const rawCsv = await response.text();
+    if (!rawCsv.trim()) return null;
+
+    const newRecords = parseCsvToRecords(rawCsv);
+    if (newRecords.length > 0) {
+      cachedRecords = newRecords;
+      currentSheetConfig.lastSyncTime = new Date().toISOString();
+      currentSheetConfig.status = 'connected';
+      return newRecords;
+    }
+  } catch (e) {
+    console.warn('Failed auto-syncing Google Sheet:', e);
+  }
+  return null;
+}
+
 // API: Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API: Get current records & sheet config
-app.get('/api/sheets/data', (req, res) => {
+// API: Get current records & sheet config (Live fetches Google Sheet if connected)
+app.get('/api/sheets/data', async (req, res) => {
+  if (currentSheetConfig.isCustom && currentSheetConfig.sheetUrl) {
+    const liveRecords = await fetchLatestFromGoogleSheet(currentSheetConfig.sheetUrl);
+    if (liveRecords) {
+      return res.json({
+        config: currentSheetConfig,
+        records: liveRecords,
+        totalRecords: liveRecords.length,
+        lastSyncTime: currentSheetConfig.lastSyncTime,
+      });
+    }
+  }
+
   res.json({
     config: currentSheetConfig,
     records: cachedRecords,
@@ -122,44 +266,10 @@ app.post('/api/sheets/parse', async (req, res) => {
       return res.status(400).json({ error: 'ไม่พบข้อมูล CSV จาก Google Sheet' });
     }
 
-    const parsed = Papa.parse<Record<string, string>>(rawCsv, {
-      header: true,
-      skipEmptyLines: true,
-    });
-
-    if (parsed.errors && parsed.errors.length > 0 && parsed.data.length === 0) {
-      return res.status(400).json({ error: 'ไม่สามารถอ่านโครงสร้าง CSV ได้' });
+    const newRecords = parseCsvToRecords(rawCsv);
+    if (newRecords.length === 0) {
+      return res.status(400).json({ error: 'ไม่สามารถอ่านโครงสร้าง CSV หรือไม่พบแถวข้อมูล' });
     }
-
-    const newRecords: HousingAllowanceRecord[] = parsed.data.map((row, index) => {
-      const normalizedRow: Record<string, string> = {};
-      Object.keys(row).forEach((colKey) => {
-        const normKey = normalizeColumnKey(colKey);
-        normalizedRow[normKey] = row[colKey] ? String(row[colKey]).trim() : '';
-      });
-
-      const empId = normalizedRow['employeeId'] || `EMP-${1000 + index}`;
-      const fName = normalizedRow['firstName'] || 'พนักงาน';
-      const lName = normalizedRow['lastName'] || 'ทั่วไป';
-      const amountVal = parseFloat(normalizedRow['amount']?.replace(/,/g, '') || '0') || 0;
-      const status = normalizeBillStatus(normalizedRow['billStatus']);
-
-      return {
-        id: `SHEET-REC-${index + 1}`,
-        employeeId: empId.toUpperCase(),
-        firstName: fName,
-        lastName: lName,
-        department: normalizedRow['department'] || 'ฝ่ายปฏิบัติการ',
-        position: normalizedRow['position'] || 'พนักงาน',
-        transferDate: normalizedRow['transferDate'] || new Date().toISOString().split('T')[0],
-        welfareItem: normalizedRow['welfareItem'] || 'ค่าที่พักประจำเดือน',
-        siteLocation: normalizedRow['siteLocation'] || 'ไซต์งานทั่วไป',
-        amount: amountVal,
-        billStatus: status,
-        note: normalizedRow['note'] || '',
-        lastUpdated: new Date().toISOString(),
-      };
-    });
 
     // Update state
     cachedRecords = newRecords;
@@ -200,12 +310,12 @@ app.post('/api/sheets/reset', (req, res) => {
 
 // API: Download Sample CSV Template
 app.get('/api/sheets/sample-csv', (req, res) => {
-  const sampleCsvText = `รหัสพนักงาน,ชื่อ,นามสกุล,แผนก,ตำแหน่ง,วันที่โอนให้,รายการสวัสดิการ,ไซส์งาน,จำนวนเงิน,สถานะการนำส่งบิล,หมายเหตุ
-EMP-1001,สมชาย,ใจดี,ฝ่ายวิศวกรรมสนาม,วิศวกรโครงการ,2026-07-28,ค่าที่พักประจำเดือน กรกฎาคม 2569,ไซต์งานบางนา-ตราด (KM.18),6500,ส่งแล้ว,อนุมัติเรียบร้อย
-EMP-1002,วิภาวี,รักชาติ,ฝ่ายควบคุมคุณภาพ,ผู้จัดการไซต์งาน,2026-07-30,ค่าที่พักประจำเดือน กรกฎาคม 2569,ไซต์งานนิคมมาบตาพุด ระยอง,8500,รอดำเนินการ,ส่งสลิปโอนแล้ว รอ HR ตรวจสอบ
-EMP-1003,กิตติพงษ์,มั่นคง,ฝ่ายความปลอดภัย,จป.วิชาชีพประจำไซต์,2026-07-29,ค่าที่พักประจำเดือน กรกฎาคม 2569,ไซต์งานก่อสร้างรถไฟฟ้า สายสีส้ม,5500,ยังไม่ส่ง,กำหนดส่งบิลวันที่ 12 ส.ค.
-EMP-1003,กิตติพงษ์,มั่นคง,ฝ่ายความปลอดภัย,จป.วิชาชีพประจำไซต์,2026-06-29,ค่าที่พักประจำเดือน มิถุนายน 2569,ไซต์งานก่อสร้างรถไฟฟ้า สายสีส้ม,5500,เกินกำหนด,เกินกำหนดส่งบิลกว่า 2 สัปดาห์
-EMP-1004,ณัฏฐา,วงศ์สว่าง,ฝ่ายออกแบบ,สถาปนิกอาวุโส,2026-07-25,ค่าเช่าบ้านต่างจังหวัด,สำนักงานโครงการเชียงใหม่,7200,ส่งแล้ว,ส่งผ่าน e-Receipt`;
+  const sampleCsvText = `วันที่โอน,รายการ,รหัสพนักงาน,ผู้เบิก(ชื่อพนักงาน),เลขทะเบียนรถ(บางรายการที่เบิกค่าน้ำมัน),ไซต์งาน,จำนวนเงินที่โอน,สถานะบิล
+2026-07-28,ค่าที่พักประจำเดือน,EMP-1001,สมชาย ใจดี,,ไซต์งานบางนา-ตราด (KM.18),6500,ส่งแล้ว
+2026-07-30,เบิกค่าน้ำมันปฏิบัติงาน,EMP-1002,วิภาวี รักชาติ,3กข-4567 กทม,ไซต์งานนิคมมาบตาพุด,2500,รอดำเนินการ
+2026-07-29,ค่าที่พักประจำเดือน,EMP-1003,กิตติพงษ์ มั่นคง,,ไซต์งานก่อสร้างรถไฟฟ้า,5500,ยังไม่ส่ง
+2026-06-29,เบิกค่าน้ำมันเดินทาง,EMP-1003,กิตติพงษ์ มั่นคง,1กข-8901 เชียงใหม่,ไซต์งานก่อสร้างรถไฟฟ้า,1800,เกินกำหนด
+2026-07-25,ค่าเช่าบ้านต่างจังหวัด,EMP-1004,ณัฏฐา วงศ์สว่าง,,สำนักงานโครงการเชียงใหม่,7200,ส่งแล้ว`;
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', 'attachment; filename="housing_allowance_template.csv"');

@@ -227,8 +227,8 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({
                   <CheckCircle2 className="w-4 h-4 text-[#7FA1B6]" />
                   <span>รองรับหัวตาราง (Headers) อัตโนมัติ:</span>
                 </div>
-                <p className="text-[#D3D1C6] text-[11px] leading-relaxed">
-                  รหัสพนักงาน, ชื่อ, นามสกุล, แผนก, ตำแหน่ง, วันที่โอนให้, รายการสวัสดิการ, ไซต์งาน, จำนวนเงิน, สถานะการนำส่งบิล
+                <p className="text-[#D3D1C6] text-[11px] leading-relaxed font-mono">
+                  วันที่โอน, รายการ, รหัสพนักงาน, ผู้เบิก(ชื่อพนักงาน), เลขทะเบียนรถ(บางรายการที่เบิกค่าน้ำมัน), ไซต์งาน, จำนวนเงินที่โอน, สถานะบิล
                 </p>
               </div>
 
@@ -276,8 +276,9 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({
                 <textarea
                   value={csvTextInput}
                   onChange={(e) => setCsvTextInput(e.target.value)}
-                  placeholder="รหัสพนักงาน,ชื่อ,นามสกุล,แผนก,วันที่โอนให้,รายการสวัสดิการ,ไซส์งาน,จำนวนเงิน,สถานะการนำส่งบิล
-EMP-1001,สมชาย,ใจดี,ฝ่ายวิศวกรรมสนาม,2026-07-28,ค่าที่พักประจำเดือน,ไซต์บางนา,6500,ส่งแล้ว"
+                  placeholder="วันที่โอน,รายการ,รหัสพนักงาน,ผู้เบิก(ชื่อพนักงาน),เลขทะเบียนรถ(บางรายการที่เบิกค่าน้ำมัน),ไซต์งาน,จำนวนเงินที่โอน,สถานะบิล
+2026-07-28,ค่าที่พักประจำเดือน,EMP-1001,สมชาย ใจดี,,ไซต์งานบางนา-ตราด,6500,ส่งแล้ว
+2026-07-30,เบิกค่าน้ำมันปฏิบัติงาน,EMP-1002,วิภาวี รักชาติ,3กข-4567 กทม,ไซต์งานนิคมมาบตาพุด,2500,รอดำเนินการ"
                   rows={6}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-[#0c2331] border border-[#7FA1B6]/40 text-xs font-mono text-[#FFFFFF] placeholder-[#7FA1B6]/50 focus:outline-none focus:border-[#7FA1B6]"
                 />

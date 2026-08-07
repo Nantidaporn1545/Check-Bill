@@ -3,6 +3,7 @@ import { EmployeeInfo, HousingAllowanceRecord, BillStatus } from '../types';
 import {
   Building2, Calendar, FileText, CheckCircle2, Clock, AlertTriangle, XCircle, Search
 } from 'lucide-react';
+import { formatThaiBEDate, formatThaiCurrency } from '../utils/formatters';
 
 interface PageEmployeeDetailProps {
   employeeInfo: EmployeeInfo;
@@ -55,29 +56,29 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
     switch (status) {
       case 'ส่งแล้ว':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1A475F] text-[#FFFFFF] border border-[#7FA1B6]/50 text-xs font-semibold">
-            <CheckCircle2 className="w-3.5 h-3.5 text-[#7FA1B6]" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 text-xs font-semibold">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             <span>ส่งแล้ว</span>
           </span>
         );
       case 'รอดำเนินการ':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7FA1B6]/20 text-[#D3D1C6] border border-[#7FA1B6]/40 text-xs font-semibold">
-            <Clock className="w-3.5 h-3.5 text-[#7FA1B6]" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/50 text-xs font-semibold">
+            <Clock className="w-3.5 h-3.5 text-sky-400" />
             <span>รอดำเนินการ</span>
           </span>
         );
       case 'เกินกำหนด':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#103042] text-[#D3D1C6] border border-orange-500/50 text-xs font-semibold">
-            <AlertTriangle className="w-3.5 h-3.5 text-orange-400" />
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/50 text-xs font-semibold">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
             <span>เกินกำหนด</span>
           </span>
         );
       case 'ยังไม่ส่ง':
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#103042] text-[#D3D1C6] border border-rose-500/50 text-xs font-semibold">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/50 text-xs font-semibold">
             <XCircle className="w-3.5 h-3.5 text-rose-400" />
             <span>ยังไม่ส่ง</span>
           </span>
@@ -121,36 +122,36 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
       {/* Summary Badges Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
         
-        <div className="p-4 rounded-2xl bg-[#1A475F]/40 border border-[#7FA1B6]/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 flex items-center justify-between">
           <div>
-            <div className="text-xs text-[#D3D1C6] font-medium">ส่งใบเสร็จแล้ว</div>
-            <div className="text-xl font-bold text-[#FFFFFF] mt-0.5">{employeeInfo.submittedCount} รายการ</div>
+            <div className="text-xs text-emerald-200/90 font-medium">ส่งใบเสร็จแล้ว</div>
+            <div className="text-xl font-bold text-emerald-300 mt-0.5">{employeeInfo.submittedCount} รายการ</div>
           </div>
-          <CheckCircle2 className="w-8 h-8 text-[#7FA1B6]/40" />
+          <CheckCircle2 className="w-8 h-8 text-emerald-400/40" />
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#1A475F]/40 border border-[#7FA1B6]/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-sky-950/30 border border-sky-500/30 flex items-center justify-between">
           <div>
-            <div className="text-xs text-[#D3D1C6] font-medium">รอดำเนินการ</div>
-            <div className="text-xl font-bold text-[#D3D1C6] mt-0.5">{employeeInfo.pendingCount} รายการ</div>
+            <div className="text-xs text-sky-200/90 font-medium">รอดำเนินการ</div>
+            <div className="text-xl font-bold text-sky-300 mt-0.5">{employeeInfo.pendingCount} รายการ</div>
           </div>
-          <Clock className="w-8 h-8 text-[#7FA1B6]/40" />
+          <Clock className="w-8 h-8 text-sky-400/40" />
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#1A475F]/40 border border-[#7FA1B6]/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-rose-950/30 border border-rose-500/30 flex items-center justify-between">
           <div>
-            <div className="text-xs text-[#D3D1C6] font-medium">ยังไม่ส่งใบเสร็จ</div>
+            <div className="text-xs text-rose-200/90 font-medium">ยังไม่ส่งใบเสร็จ</div>
             <div className="text-xl font-bold text-rose-300 mt-0.5">{employeeInfo.unsubmittedCount} รายการ</div>
           </div>
-          <XCircle className="w-8 h-8 text-rose-400/30" />
+          <XCircle className="w-8 h-8 text-rose-400/40" />
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#1A475F]/40 border border-[#7FA1B6]/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/30 flex items-center justify-between">
           <div>
-            <div className="text-xs text-[#D3D1C6] font-medium">เกินกำหนดส่ง</div>
-            <div className="text-xl font-bold text-orange-300 mt-0.5">{employeeInfo.overdueCount} รายการ</div>
+            <div className="text-xs text-amber-200/90 font-medium">เกินกำหนดส่ง</div>
+            <div className="text-xl font-bold text-amber-300 mt-0.5">{employeeInfo.overdueCount} รายการ</div>
           </div>
-          <AlertTriangle className="w-8 h-8 text-orange-400/30" />
+          <AlertTriangle className="w-8 h-8 text-amber-400/40" />
         </div>
 
       </div>
@@ -226,17 +227,18 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-[#7FA1B6]/30 bg-[#0c2331] text-[#7FA1B6] text-xs font-semibold uppercase tracking-wider">
-                <th className="py-3.5 px-4 sm:px-6">วันที่โอนให้</th>
-                <th className="py-3.5 px-4 sm:px-6">รายการสวัสดิการ</th>
-                <th className="py-3.5 px-4 sm:px-6">ไซส์งาน / โครงการ</th>
-                <th className="py-3.5 px-4 sm:px-6 text-right">จำนวนเงิน (บาท)</th>
-                <th className="py-3.5 px-4 sm:px-6 text-center">สถานะการนำส่งบิล</th>
+                <th className="py-3.5 px-4 sm:px-6">วันที่โอน</th>
+                <th className="py-3.5 px-4 sm:px-6">รายการ</th>
+                <th className="py-3.5 px-4 sm:px-6">เลขทะเบียนรถ</th>
+                <th className="py-3.5 px-4 sm:px-6">ไซต์งาน</th>
+                <th className="py-3.5 px-4 sm:px-6 text-right">จำนวนเงินที่โอน</th>
+                <th className="py-3.5 px-4 sm:px-6 text-center">สถานะบิล</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#7FA1B6]/20 text-sm">
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-[#D3D1C6]/70">
+                  <td colSpan={6} className="py-12 text-center text-[#D3D1C6]/70">
                     <p className="text-base font-medium">ไม่พบรายการที่ตรงกับเงื่อนไขการค้นหา</p>
                     <p className="text-xs mt-1 text-[#7FA1B6]">ลองเปลี่ยนตัวกรองสถานะหรือลบข้อความค้นหา</p>
                   </td>
@@ -245,17 +247,18 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
                 filteredRecords.map((record) => (
                   <tr
                     key={record.id}
-                    className="hover:bg-[#1A475F]/30 transition-colors group"
+                    className="hover:bg-[#1A475F]/30 transition-colors group cursor-pointer"
+                    onClick={() => onOpenDetailModal(record)}
                   >
-                    {/* วันที่โอนให้ */}
+                    {/* วันที่โอน */}
                     <td className="py-4 px-4 sm:px-6 text-[#D3D1C6] font-mono text-xs whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-[#7FA1B6] shrink-0" />
-                        <span>{record.transferDate}</span>
+                        <span>{formatThaiBEDate(record.transferDate)}</span>
                       </div>
                     </td>
 
-                    {/* รายการสวัสดิการ */}
+                    {/* รายการ */}
                     <td className="py-4 px-4 sm:px-6 text-[#FFFFFF] font-medium">
                       <div>{record.welfareItem}</div>
                       {record.note && (
@@ -265,7 +268,18 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
                       )}
                     </td>
 
-                    {/* ไซส์งาน */}
+                    {/* เลขทะเบียนรถ */}
+                    <td className="py-4 px-4 sm:px-6 text-[#D3D1C6] text-xs whitespace-nowrap">
+                      {record.vehiclePlate ? (
+                        <span className="px-2.5 py-1 rounded-lg bg-[#0c2331] border border-[#7FA1B6]/40 text-[#FFFFFF] font-mono text-xs font-semibold">
+                          🚗 {record.vehiclePlate}
+                        </span>
+                      ) : (
+                        <span className="text-[#7FA1B6]/40">-</span>
+                      )}
+                    </td>
+
+                    {/* ไซต์งาน */}
                     <td className="py-4 px-4 sm:px-6 text-[#D3D1C6]">
                       <div className="flex items-center gap-1.5">
                         <Building2 className="w-3.5 h-3.5 text-[#7FA1B6] shrink-0" />
@@ -273,12 +287,12 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
                       </div>
                     </td>
 
-                    {/* จำนวนเงิน */}
+                    {/* จำนวนเงินที่โอน */}
                     <td className="py-4 px-4 sm:px-6 text-right font-bold text-[#FFFFFF] font-mono text-base whitespace-nowrap">
-                      ฿{record.amount.toLocaleString('th-TH')}
+                      {formatThaiCurrency(record.amount)}
                     </td>
 
-                    {/* สถานะการนำส่งบิล */}
+                    {/* สถานะบิล */}
                     <td className="py-4 px-4 sm:px-6 text-center whitespace-nowrap">
                       {renderStatusBadge(record.billStatus)}
                     </td>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { HousingAllowanceRecord } from '../types';
 import { X, CheckCircle2, Clock, AlertTriangle, XCircle, Building2, Calendar, FileText, ExternalLink, Image as ImageIcon } from 'lucide-react';
+import { formatThaiBEDate, formatThaiCurrency } from '../utils/formatters';
 
 interface RecordDetailModalProps {
   isOpen: boolean;
@@ -58,25 +59,32 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
             <div className="p-3.5 rounded-xl bg-[#0c2331] border border-[#7FA1B6]/30">
               <div className="text-[#D3D1C6] mb-1 flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5 text-[#7FA1B6]" />
-                <span>วันที่โอนให้</span>
+                <span>วันที่โอน</span>
               </div>
-              <div className="text-sm font-bold text-[#FFFFFF] font-mono">{record.transferDate}</div>
+              <div className="text-sm font-bold text-[#FFFFFF] font-mono">{formatThaiBEDate(record.transferDate)}</div>
             </div>
 
             <div className="p-3.5 rounded-xl bg-[#0c2331] border border-[#7FA1B6]/30">
-              <div className="text-[#D3D1C6] mb-1">จำนวนเงินที่ได้รับ</div>
+              <div className="text-[#D3D1C6] mb-1">จำนวนเงินที่โอน</div>
               <div className="text-sm font-extrabold text-[#FFFFFF] font-mono">
-                ฿{record.amount.toLocaleString('th-TH')}
+                {formatThaiCurrency(record.amount)}
               </div>
             </div>
 
             <div className="p-3.5 rounded-xl bg-[#0c2331] border border-[#7FA1B6]/30 col-span-2">
               <div className="text-[#D3D1C6] mb-1 flex items-center gap-1.5">
                 <Building2 className="w-3.5 h-3.5 text-[#7FA1B6]" />
-                <span>รายการสวัสดิการ & ไซต์งาน</span>
+                <span>รายการ & ไซต์งาน</span>
               </div>
               <div className="text-sm font-semibold text-[#FFFFFF]">{record.welfareItem}</div>
-              <div className="text-xs text-[#7FA1B6] mt-1">{record.siteLocation}</div>
+              <div className="text-xs text-[#7FA1B6] mt-1 flex items-center justify-between">
+                <span>{record.siteLocation}</span>
+                {record.vehiclePlate && (
+                  <span className="font-mono text-[#FFFFFF] bg-[#103042] px-2 py-0.5 rounded border border-[#7FA1B6]/40">
+                    🚗 ทะเบียน: {record.vehiclePlate}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -85,23 +93,23 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
             <div className="text-xs text-[#D3D1C6]">สถานะการนำส่งบิล:</div>
             <div className="text-sm font-semibold">
               {record.billStatus === 'ส่งแล้ว' && (
-                <span className="text-[#FFFFFF] flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-[#7FA1B6]" /> ส่งใบเสร็จแล้ว
+                <span className="text-emerald-300 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> ส่งใบเสร็จแล้ว
                 </span>
               )}
               {record.billStatus === 'รอดำเนินการ' && (
-                <span className="text-[#D3D1C6] flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-[#7FA1B6]" /> รอดำเนินการตรวจสอบ
+                <span className="text-sky-300 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-500/40">
+                  <Clock className="w-4 h-4 text-sky-400" /> รอดำเนินการตรวจสอบ
                 </span>
               )}
               {record.billStatus === 'ยังไม่ส่ง' && (
-                <span className="text-rose-300 flex items-center gap-1.5">
+                <span className="text-rose-300 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/40">
                   <XCircle className="w-4 h-4 text-rose-400" /> ยังไม่ได้ส่งใบเสร็จ
                 </span>
               )}
               {record.billStatus === 'เกินกำหนด' && (
-                <span className="text-orange-300 flex items-center gap-1.5">
-                  <AlertTriangle className="w-4 h-4 text-orange-400" /> เกินกำหนดส่งใบเสร็จ
+                <span className="text-amber-300 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40">
+                  <AlertTriangle className="w-4 h-4 text-amber-400" /> เกินกำหนดส่งใบเสร็จ
                 </span>
               )}
             </div>

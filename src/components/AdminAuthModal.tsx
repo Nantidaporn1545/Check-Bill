@@ -42,7 +42,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
         onSuccess();
       }, 800);
     } else {
-      setErrorMsg('รหัส PIN ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+      setErrorMsg('รหัสผ่านผู้ดูแลระบบไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
     }
   };
 
@@ -118,23 +118,20 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-[#FFFFFF] mb-2">
-                  กรอกรหัส PIN ผู้ดูแลระบบ
+                  กรอกรหัสผ่านผู้ดูแลระบบ
                 </label>
                 <div className="relative">
                   <input
                     type="password"
-                    maxLength={10}
+                    maxLength={30}
                     value={pinInput}
                     onChange={(e) => setPinInput(e.target.value)}
-                    placeholder="รหัส PIN (เริ่มต้น: 1234)"
+                    placeholder="รหัสผ่านผู้ดูแลระบบ"
                     className="w-full px-4 py-3 rounded-2xl bg-[#0c2331] border border-[#7FA1B6]/40 text-center text-lg font-mono text-[#FFFFFF] tracking-widest placeholder:text-xs placeholder:tracking-normal placeholder-[#7FA1B6]/50 focus:outline-none focus:border-[#7FA1B6]"
                     autoFocus
                   />
                   <KeyRound className="w-5 h-5 text-[#7FA1B6] absolute right-4 top-3.5 pointer-events-none" />
                 </div>
-                <p className="text-[11px] text-[#7FA1B6] mt-2 text-center">
-                  * รหัส PIN เริ่มต้นระบบคือ <strong className="text-[#FFFFFF]">1234</strong>
-                </p>
               </div>
 
               <div className="pt-2 flex items-center justify-between gap-3">
@@ -144,7 +141,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                     onClick={() => setIsChangingPinMode(true)}
                     className="text-xs text-[#7FA1B6] hover:text-[#FFFFFF] underline transition-colors cursor-pointer"
                   >
-                    เปลี่ยนรหัส PIN
+                    เปลี่ยนรหัสผ่านผู้ดูแลระบบ
                   </button>
                 )}
 
@@ -169,9 +166,9 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
           ) : (
             /* Change PIN form */
             <form onSubmit={handleChangePin} className="space-y-4">
-              <h4 className="text-xs font-bold text-[#FFFFFF]">ตั้งค่าเปลี่ยนรหัส PIN ใหม่</h4>
+              <h4 className="text-xs font-bold text-[#FFFFFF]">ตั้งค่าเปลี่ยนรหัสผ่านใหม่</h4>
               <div>
-                <label className="block text-[11px] text-[#D3D1C6] mb-1">รหัส PIN เดิม</label>
+                <label className="block text-[11px] text-[#D3D1C6] mb-1">รหัสผ่านเดิม</label>
                 <input
                   type="password"
                   value={oldPin}
@@ -181,7 +178,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] text-[#D3D1C6] mb-1">รหัส PIN ใหม่ (อย่างน้อย 4 หลัก)</label>
+                <label className="block text-[11px] text-[#D3D1C6] mb-1">รหัสผ่านใหม่ (อย่างน้อย 4 หลัก)</label>
                 <input
                   type="password"
                   value={newPin}
@@ -191,7 +188,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] text-[#D3D1C6] mb-1">ยืนยันรหัส PIN ใหม่</label>
+                <label className="block text-[11px] text-[#D3D1C6] mb-1">ยืนยันรหัสผ่านใหม่</label>
                 <input
                   type="password"
                   value={confirmPin}
@@ -212,7 +209,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                   type="submit"
                   className="px-4 py-2 rounded-xl bg-[#103042] hover:bg-[#13384D] text-[#FFFFFF] border border-[#7FA1B6]/60 text-xs font-semibold cursor-pointer"
                 >
-                  บันทึก PIN ใหม่
+                  บันทึกรหัสผ่านใหม่
                 </button>
               </div>
             </form>

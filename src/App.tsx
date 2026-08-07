@@ -25,7 +25,9 @@ export default function App() {
     return sessionStorage.getItem('is_admin_logged_in') === 'true';
   });
   const [adminPin, setAdminPin] = useState<string>(() => {
-    return localStorage.getItem('admin_pin_code') || '1234';
+    const saved = localStorage.getItem('admin_pin_code');
+    if (!saved || saved === '1234') return 'Film1545';
+    return saved;
   });
   const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
 
@@ -65,9 +67,25 @@ export default function App() {
     showToast('เปลี่ยนรหัส PIN ผู้ดูแลระบบสำเร็จ');
   };
 
-  // Initial load
+  // Initial load & automatic sync polling
   useEffect(() => {
     loadData();
+
+    // Background auto-polling to keep Google Sheet status in sync in real-time
+    const intervalId = setInterval(() => {
+      fetchSheetData().then((data) => {
+        if (data.records && data.records.length > 0) {
+          setRecords(data.records);
+        }
+        if (data.config) {
+          setSheetConfig(data.config);
+        }
+      }).catch((err) => {
+        console.warn('Background sync polling skipped:', err);
+      });
+    }, 15000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const loadData = async () => {

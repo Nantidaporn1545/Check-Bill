@@ -1,5 +1,6 @@
 import { HousingAllowanceRecord, EmployeeInfo, SheetConfig } from '../types';
 import { MOCK_HOUSING_RECORDS, DEFAULT_SHEET_CONFIG } from '../data/mockData';
+import { parseDateToTimestamp } from '../utils/formatters';
 
 const LOCAL_STORAGE_RECORDS_KEY = 'housing_allowance_records_v1';
 const LOCAL_STORAGE_CONFIG_KEY = 'housing_allowance_config_v1';
@@ -41,14 +42,37 @@ export function getLocalConfig(): SheetConfig | null {
 
 // Fetch all records & sheet config from API
 export async function fetchSheetData(): Promise<{ config: SheetConfig; records: HousingAllowanceRecord[] }> {
+  const localConfig = getLocalConfig();
+
+  // If local storage has a connected custom Google Sheet, sync directly with Google Sheet URL first
+  if (localConfig?.isCustom && localConfig?.sheetUrl) {
+    try {
+      const syncRes = await syncCustomSheetUrl(localConfig.sheetUrl);
+      if (syncRes.success && syncRes.records && syncRes.records.length > 0) {
+        saveLocalRecords(syncRes.records);
+        saveLocalConfig(syncRes.config);
+        return { config: syncRes.config, records: syncRes.records };
+      }
+    } catch (e) {
+      console.warn('Direct Google Sheet auto-resync failed, falling back to backend API:', e);
+    }
+  }
+
   try {
     const response = await fetch('/api/sheets/data');
     if (response.ok) {
       const data = await response.json();
+
+      // If server has custom synced records or server data, sync local storage & use server records
+      if (data.config?.isCustom && data.records && data.records.length > 0) {
+        saveLocalRecords(data.records);
+        saveLocalConfig(data.config);
+        return { config: data.config, records: data.records };
+      }
+
       const localRecs = getLocalRecords();
-      // Use local overrides if available
       const recordsToUse = localRecs || data.records || MOCK_HOUSING_RECORDS;
-      const configToUse = getLocalConfig() || data.config || DEFAULT_SHEET_CONFIG;
+      const configToUse = localConfig || data.config || DEFAULT_SHEET_CONFIG;
       return { config: configToUse, records: recordsToUse };
     }
   } catch (err) {
@@ -57,7 +81,7 @@ export async function fetchSheetData(): Promise<{ config: SheetConfig; records: 
 
   const localRecs = getLocalRecords();
   return {
-    config: getLocalConfig() || DEFAULT_SHEET_CONFIG,
+    config: localConfig || DEFAULT_SHEET_CONFIG,
     records: localRecs || MOCK_HOUSING_RECORDS,
   };
 }
@@ -138,7 +162,7 @@ export function getEmployeeSummary(employeeId: string, records: HousingAllowance
     lastName: primary.lastName,
     department: primary.department || 'ฝ่ายปฏิบัติการ',
     position: primary.position || 'พนักงาน',
-    records: matchedRecords.sort((a, b) => new Date(b.transferDate).getTime() - new Date(a.transferDate).getTime()),
+    records: matchedRecords.sort((a, b) => parseDateToTimestamp(b.transferDate) - parseDateToTimestamp(a.transferDate)),
     totalAmount,
     submittedCount,
     pendingCount,

@@ -10,6 +10,7 @@ export interface HousingAllowanceRecord {
   transferDate: string;
   welfareItem: string;
   siteLocation: string;
+  vehiclePlate?: string;
   amount: number;
   billStatus: BillStatus;
   billDueDate?: string;
