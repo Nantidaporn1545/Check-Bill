@@ -100,36 +100,6 @@ function normalizeBillStatus(rawStatus: string): BillStatus {
   return 'ยังไม่ส่ง';
 }
 
-// Helper to parse Google Sheets CSV URL
-function extractGoogleSheetCsvUrl(inputUrl: string): string {
-  let url = inputUrl.trim();
-  if (!url) return '';
-
-  // If user pasted a direct CSV link
-  if (url.endsWith('.csv') || url.includes('output=csv')) {
-    return url;
-  }
-
-  // Handle standard Google Sheets edit or pubhtml link
-  // e.g. https://docs.google.com/spreadsheets/d/SHEET_ID/edit#gid=123
-  // e.g. https://docs.google.com/spreadsheets/d/e/2PACX-.../pubhtml
-  const pubMatch = url.match(/\/d\/e\/([a-zA-Z0-9-_]+)/);
-  if (pubMatch && pubMatch[1]) {
-    return `https://docs.google.com/spreadsheets/d/e/${pubMatch[1]}/pub?output=csv`;
-  }
-
-  const idMatch = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
-  if (idMatch && idMatch[1]) {
-    const sheetId = idMatch[1];
-    // Extract gid if present
-    const gidMatch = url.match(/gid=([0-9]+)/);
-    const gid = gidMatch ? gidMatch[1] : '0';
-    return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-  }
-
-  return url;
-}
-
 // Helper to convert CSV string into HousingAllowanceRecord array
 function parseCsvToRecords(rawCsv: string): HousingAllowanceRecord[] {
   const parsed = Papa.parse<Record<string, string>>(rawCsv, {
@@ -182,6 +152,87 @@ function parseCsvToRecords(rawCsv: string): HousingAllowanceRecord[] {
   });
 }
 
+// Helper to parse candidate Google Sheets CSV URLs for maximum compatibility
+function getCandidateCsvUrls(inputUrl: string): string[] {
+  let url = inputUrl.trim();
+  if (!url) return [];
+
+  const candidates: string[] = [];
+
+  // If user pasted a direct CSV link or gviz link already
+  if (url.endsWith('.csv') || url.includes('output=csv') || url.includes('gviz/tq')) {
+    candidates.push(url);
+  }
+
+  // Check for published web link: /d/e/2PACX-...
+  const pubMatch = url.match(/\/d\/e\/([a-zA-Z0-9-_]+)/);
+  if (pubMatch && pubMatch[1]) {
+    const pubId = pubMatch[1];
+    const gidMatch = url.match(/[?&#]gid=([0-9]+)/);
+    const gidParam = gidMatch ? `&gid=${gidMatch[1]}` : '';
+    candidates.push(`https://docs.google.com/spreadsheets/d/e/${pubId}/pub?output=csv${gidParam}`);
+    candidates.push(`https://docs.google.com/spreadsheets/d/e/${pubId}/pub?output=csv`);
+  }
+
+  // Check for standard Google Sheet ID or Drive file ID: /d/SHEET_ID
+  const idMatch = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  if (idMatch && idMatch[1]) {
+    const sheetId = idMatch[1];
+    const gidMatch = url.match(/[?&#]gid=([0-9]+)/);
+    const gid = gidMatch ? gidMatch[1] : null;
+
+    // 1. Google Visualization API (gviz/tq) - most reliable endpoint for shared Google Sheets
+    if (gid) {
+      candidates.push(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&gid=${gid}`);
+    }
+    candidates.push(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`);
+
+    // 2. Direct export format=csv with gid if present
+    if (gid) {
+      candidates.push(`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`);
+    }
+    candidates.push(`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`);
+
+    // 3. Drive export (if uploaded CSV/XLSX file on Drive)
+    candidates.push(`https://drive.google.com/uc?export=download&id=${sheetId}`);
+  }
+
+  if (candidates.length === 0) {
+    candidates.push(url);
+  }
+
+  return Array.from(new Set(candidates));
+}
+
+// Fetch CSV with multi-candidate fallbacks
+async function fetchCsvFromGoogleSheet(sheetUrl: string): Promise<string | null> {
+  const candidates = getCandidateCsvUrls(sheetUrl);
+
+  for (const candidateUrl of candidates) {
+    try {
+      console.log(`Attempting Google Sheet CSV fetch from: ${candidateUrl}`);
+      const response = await fetch(candidateUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/csv,text/plain,application/csv,*/*',
+        },
+      });
+
+      if (response.ok) {
+        const text = await response.text();
+        if (text && text.trim() && !isHtmlContent(text)) {
+          console.log(`Successfully fetched Google Sheet CSV from: ${candidateUrl}`);
+          return text;
+        }
+      }
+    } catch (e) {
+      console.warn(`Candidate fetch error (${candidateUrl}):`, e);
+    }
+  }
+
+  return null;
+}
+
 // Helper to check if fetched string is actually HTML error or login page instead of CSV
 function isHtmlContent(str: string): boolean {
   if (!str) return false;
@@ -194,23 +245,16 @@ function isHtmlContent(str: string): boolean {
     trimmed.includes('<head') ||
     trimmed.includes('google drive') ||
     trimmed.includes('sign in') ||
-    trimmed.includes('page not found')
+    trimmed.includes('page not found') ||
+    trimmed.includes('accounts.google.com')
   );
 }
 
 // Helper to auto-sync from Google Sheet URL
 async function fetchLatestFromGoogleSheet(sheetUrl: string): Promise<HousingAllowanceRecord[] | null> {
-  const targetCsvUrl = extractGoogleSheetCsvUrl(sheetUrl);
-  if (!targetCsvUrl) return null;
-
   try {
-    const response = await fetch(targetCsvUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-    });
-
-    if (!response.ok) return null;
-    const rawCsv = await response.text();
-    if (!rawCsv.trim() || isHtmlContent(rawCsv)) return null;
+    const rawCsv = await fetchCsvFromGoogleSheet(sheetUrl);
+    if (!rawCsv) return null;
 
     const newRecords = parseCsvToRecords(rawCsv);
     if (newRecords.length > 0) {
@@ -259,23 +303,14 @@ app.post('/api/sheets/parse', async (req, res) => {
     let rawCsv = csvText || '';
 
     if (!rawCsv && sheetUrl) {
-      const targetCsvUrl = extractGoogleSheetCsvUrl(sheetUrl);
-      if (!targetCsvUrl) {
-        return res.status(400).json({ error: 'รูปแบบ URL Google Sheets ไม่ถูกต้อง' });
-      }
-
-      console.log(`Fetching Google Sheet from: ${targetCsvUrl}`);
-      const response = await fetch(targetCsvUrl, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-      });
-
-      if (!response.ok) {
+      console.log(`Fetching Google Sheet from URL: ${sheetUrl}`);
+      const fetchedCsv = await fetchCsvFromGoogleSheet(sheetUrl);
+      if (!fetchedCsv) {
         return res.status(400).json({
-          error: `ไม่สามารถเข้าถึง Google Sheet ได้ (HTTP ${response.status}) กรุณาตรวจสอบว่าคุณเปิดสิทธิ์ "ทุกคนที่มีลิงก์สามารถดูได้" (Share with anyone) หรือ "เผยแพร่ไปยังเว็บ" (Publish to Web) แล้ว`,
+          error: `ไม่สามารถเข้าถึง Google Sheet ได้ กรุณาตรวจสอบว่าคุณเลือก "แชร์" -> "ทุกคนที่มีลิงก์" (Anyone with the link) หรือเลือก ไฟล์ -> แชร์ -> เผยแพร่ไปยังเว็บ (Publish to Web) แล้ว หรือลองใช้แท็บ "วางข้อความ / อัปโหลด CSV" เพื่อเลือกไฟล์ตรงได้ทันที`,
         });
       }
-
-      rawCsv = await response.text();
+      rawCsv = fetchedCsv;
     }
 
     if (!rawCsv.trim()) {
