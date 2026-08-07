@@ -182,6 +182,22 @@ function parseCsvToRecords(rawCsv: string): HousingAllowanceRecord[] {
   });
 }
 
+// Helper to check if fetched string is actually HTML error or login page instead of CSV
+function isHtmlContent(str: string): boolean {
+  if (!str) return false;
+  const trimmed = str.trim().toLowerCase();
+  return (
+    trimmed.startsWith('<!doctype') ||
+    trimmed.startsWith('<html') ||
+    trimmed.startsWith('the page') ||
+    trimmed.includes('<html') ||
+    trimmed.includes('<head') ||
+    trimmed.includes('google drive') ||
+    trimmed.includes('sign in') ||
+    trimmed.includes('page not found')
+  );
+}
+
 // Helper to auto-sync from Google Sheet URL
 async function fetchLatestFromGoogleSheet(sheetUrl: string): Promise<HousingAllowanceRecord[] | null> {
   const targetCsvUrl = extractGoogleSheetCsvUrl(sheetUrl);
@@ -194,7 +210,7 @@ async function fetchLatestFromGoogleSheet(sheetUrl: string): Promise<HousingAllo
 
     if (!response.ok) return null;
     const rawCsv = await response.text();
-    if (!rawCsv.trim()) return null;
+    if (!rawCsv.trim() || isHtmlContent(rawCsv)) return null;
 
     const newRecords = parseCsvToRecords(rawCsv);
     if (newRecords.length > 0) {
@@ -264,6 +280,12 @@ app.post('/api/sheets/parse', async (req, res) => {
 
     if (!rawCsv.trim()) {
       return res.status(400).json({ error: 'ไม่พบข้อมูล CSV จาก Google Sheet' });
+    }
+
+    if (isHtmlContent(rawCsv)) {
+      return res.status(400).json({
+        error: 'ไม่สามารถอ่านไฟล์ CSV ได้เนื่องจาก Google Sheet ไม่ได้เปิดสิทธิ์สาธารณะ กรุณาเปลี่ยนสิทธิ์การแชร์เป็น "ทุกคนที่มีลิงก์" (Anyone with the link) หรือเลือก "เผยแพร่ไปยังเว็บ" (Publish to Web)',
+      });
     }
 
     const newRecords = parseCsvToRecords(rawCsv);

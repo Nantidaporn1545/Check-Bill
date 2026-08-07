@@ -60,20 +60,29 @@ export async function fetchSheetData(): Promise<{ config: SheetConfig; records: 
 
   try {
     const response = await fetch('/api/sheets/data');
-    if (response.ok) {
-      const data = await response.json();
-
-      // If server has custom synced records or server data, sync local storage & use server records
-      if (data.config?.isCustom && data.records && data.records.length > 0) {
-        saveLocalRecords(data.records);
-        saveLocalConfig(data.config);
-        return { config: data.config, records: data.records };
+    const contentType = response.headers.get('content-type');
+    if (response.ok && contentType && contentType.includes('application/json')) {
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonErr) {
+        console.warn('Failed to parse JSON from /api/sheets/data:', jsonErr);
+        data = null;
       }
 
-      const localRecs = getLocalRecords();
-      const recordsToUse = localRecs || data.records || MOCK_HOUSING_RECORDS;
-      const configToUse = localConfig || data.config || DEFAULT_SHEET_CONFIG;
-      return { config: configToUse, records: recordsToUse };
+      if (data) {
+        // If server has custom synced records or server data, sync local storage & use server records
+        if (data.config?.isCustom && data.records && data.records.length > 0) {
+          saveLocalRecords(data.records);
+          saveLocalConfig(data.config);
+          return { config: data.config, records: data.records };
+        }
+
+        const localRecs = getLocalRecords();
+        const recordsToUse = localRecs || data.records || MOCK_HOUSING_RECORDS;
+        const configToUse = localConfig || data.config || DEFAULT_SHEET_CONFIG;
+        return { config: configToUse, records: recordsToUse };
+      }
     }
   } catch (err) {
     console.warn('Backend API unavailable, using fallback mock data:', err);
@@ -95,9 +104,25 @@ export async function syncCustomSheetUrl(sheetUrl: string, csvText?: string): Pr
       body: JSON.stringify({ sheetUrl, csvText }),
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || 'ไม่สามารถดึงข้อมูลจาก Google Sheet ได้');
+    const contentType = response.headers.get('content-type');
+    let data: any = null;
+
+    if (contentType && contentType.includes('application/json')) {
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error('ไม่สามารถอ่านข้อมูลตอบกลับจากเซิร์ฟเวอร์ได้ (รูปแบบ JSON ไม่ถูกต้อง)');
+      }
+    } else {
+      const textResp = await response.text();
+      if (textResp.includes('The page') || textResp.includes('<!DOCTYPE') || textResp.includes('<html')) {
+        throw new Error('ไม่สามารถเข้าถึง Google Sheet ได้ โปรดตรวจสอบว่าได้แชร์สิทธิ์เป็น "ทุกคนที่มีลิงก์" (Anyone with the link)');
+      }
+      throw new Error('ได้รับข้อมูลตอบกลับที่ไม่ใช่ JSON จากเซิร์ฟเวอร์');
+    }
+
+    if (!response.ok || !data) {
+      throw new Error(data?.error || 'ไม่สามารถดึงข้อมูลจาก Google Sheet ได้');
     }
 
     saveLocalRecords(data.records);
