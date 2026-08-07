@@ -122,36 +122,36 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
       {/* Summary Badges Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
         
-        <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 flex items-center justify-between shadow-2xs">
-          <div>
-            <div className="text-xs text-emerald-800 font-medium">ส่งใบเสร็จแล้ว</div>
-            <div className="text-xl font-bold text-emerald-900 mt-0.5">{employeeInfo.submittedCount} รายการ</div>
-          </div>
-          <CheckCircle2 className="w-8 h-8 text-emerald-500/40" />
-        </div>
-
-        <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-200/80 flex items-center justify-between shadow-2xs">
+        <div className="p-4 rounded-2xl bg-sky-50/80 border border-sky-200 flex items-center justify-between shadow-2xs">
           <div>
             <div className="text-xs text-sky-800 font-medium">รอดำเนินการ</div>
             <div className="text-xl font-bold text-sky-900 mt-0.5">{employeeInfo.pendingCount} รายการ</div>
           </div>
-          <Clock className="w-8 h-8 text-sky-500/40" />
+          <Clock className="w-8 h-8 text-sky-500/50" />
         </div>
 
-        <div className="p-4 rounded-2xl bg-rose-50/60 border border-rose-200/80 flex items-center justify-between shadow-2xs">
+        <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 flex items-center justify-between shadow-2xs">
           <div>
-            <div className="text-xs text-rose-800 font-medium">ยังไม่ส่งใบเสร็จ</div>
+            <div className="text-xs text-emerald-800 font-medium">ส่งแล้ว</div>
+            <div className="text-xl font-bold text-emerald-900 mt-0.5">{employeeInfo.submittedCount} รายการ</div>
+          </div>
+          <CheckCircle2 className="w-8 h-8 text-emerald-500/50" />
+        </div>
+
+        <div className="p-4 rounded-2xl bg-rose-50/80 border border-rose-200 flex items-center justify-between shadow-2xs">
+          <div>
+            <div className="text-xs text-rose-800 font-medium">ยังไม่ส่ง</div>
             <div className="text-xl font-bold text-rose-900 mt-0.5">{employeeInfo.unsubmittedCount} รายการ</div>
           </div>
-          <XCircle className="w-8 h-8 text-rose-500/40" />
+          <XCircle className="w-8 h-8 text-rose-500/50" />
         </div>
 
-        <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 flex items-center justify-between shadow-2xs">
+        <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 flex items-center justify-between shadow-2xs">
           <div>
-            <div className="text-xs text-amber-800 font-medium">เกินกำหนดส่ง</div>
+            <div className="text-xs text-amber-800 font-medium">เกินกำหนด</div>
             <div className="text-xl font-bold text-amber-900 mt-0.5">{employeeInfo.overdueCount} รายการ</div>
           </div>
-          <AlertTriangle className="w-8 h-8 text-amber-500/40" />
+          <AlertTriangle className="w-8 h-8 text-amber-500/50" />
         </div>
 
       </div>
@@ -188,7 +188,7 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
 
             {/* Filter Status */}
             <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 text-xs">
-              {['ทั้งหมด', 'ส่งแล้ว', 'รอดำเนินการ', 'ยังไม่ส่ง', 'เกินกำหนด'].map((st) => (
+              {['ทั้งหมด', 'รอดำเนินการ', 'ส่งแล้ว', 'ยังไม่ส่ง', 'เกินกำหนด'].map((st) => (
                 <button
                   key={st}
                   onClick={() => setSelectedStatus(st)}

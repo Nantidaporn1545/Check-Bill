@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { HousingAllowanceRecord } from '../types';
-import { Search, AlertCircle, ChevronRight, FileSpreadsheet, Lock } from 'lucide-react';
+import { Search, AlertCircle, ChevronRight, FileSpreadsheet, Lock, Building2 } from 'lucide-react';
 
 interface PageSearchProps {
   records: HousingAllowanceRecord[];
@@ -56,11 +56,6 @@ export const PageSearch: React.FC<PageSearchProps> = ({
         <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-indigo-100/50 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 space-y-6">
-
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-xs font-semibold">
-            <Building2 className="w-3.5 h-3.5 text-sky-600" />
-            <span>ระบบสวัสดิการพนักงาน</span>
-          </div>
 
           <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
             ตรวจสอบประวัติการเบิกเงินสวัสดิการค่าที่พัก

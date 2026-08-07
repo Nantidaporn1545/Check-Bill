@@ -218,7 +218,6 @@ export default function App() {
         isOpen={!!detailModalRecord}
         onClose={() => setDetailModalRecord(null)}
         record={detailModalRecord}
-        onOpenUpload={(rec) => setUploadModalRecord(rec)}
       />
 
     </div>
