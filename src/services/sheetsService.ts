@@ -46,17 +46,22 @@ export async function fetchSheetData(): Promise<{ config: SheetConfig; records: 
   const localRecords = getLocalRecords();
   const localConfig = getLocalConfig();
 
-  // If local storage already has custom synced records, use them immediately without fallback to mock
-  if (localRecords && localRecords.length > 0) {
-    // If there's a custom sheet URL, attempt background resync silently
-    if (localConfig?.isCustom && localConfig?.sheetUrl) {
-      syncCustomSheetUrl(localConfig.sheetUrl).then((syncRes) => {
-        if (syncRes.success && syncRes.records && syncRes.records.length > 0) {
-          saveLocalRecords(syncRes.records);
-          saveLocalConfig(syncRes.config);
-        }
-      }).catch(() => {});
+  // If there's a custom sheet URL configured, attempt to sync directly first to ensure live latest data from Google Sheet
+  if (localConfig?.isCustom && localConfig?.sheetUrl) {
+    try {
+      const syncRes = await syncCustomSheetUrl(localConfig.sheetUrl);
+      if (syncRes.success && syncRes.records && syncRes.records.length > 0) {
+        saveLocalRecords(syncRes.records);
+        saveLocalConfig(syncRes.config);
+        return { config: syncRes.config, records: syncRes.records };
+      }
+    } catch (e) {
+      console.warn('Direct Google Sheet auto-resync failed, using cached local records if available:', e);
     }
+  }
+
+  // If local storage already has custom synced records, use them
+  if (localRecords && localRecords.length > 0) {
     return {
       config: localConfig || DEFAULT_SHEET_CONFIG,
       records: localRecords,
