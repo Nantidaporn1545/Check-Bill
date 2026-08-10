@@ -43,20 +43,24 @@ export function getLocalConfig(): SheetConfig | null {
 
 // Fetch all records & sheet config from API
 export async function fetchSheetData(): Promise<{ config: SheetConfig; records: HousingAllowanceRecord[] }> {
+  const localRecords = getLocalRecords();
   const localConfig = getLocalConfig();
 
-  // If local storage has a connected custom Google Sheet, sync directly with Google Sheet URL first
-  if (localConfig?.isCustom && localConfig?.sheetUrl) {
-    try {
-      const syncRes = await syncCustomSheetUrl(localConfig.sheetUrl);
-      if (syncRes.success && syncRes.records && syncRes.records.length > 0) {
-        saveLocalRecords(syncRes.records);
-        saveLocalConfig(syncRes.config);
-        return { config: syncRes.config, records: syncRes.records };
-      }
-    } catch (e) {
-      console.warn('Direct Google Sheet auto-resync failed, falling back to backend API:', e);
+  // If local storage already has custom synced records, use them immediately without fallback to mock
+  if (localRecords && localRecords.length > 0) {
+    // If there's a custom sheet URL, attempt background resync silently
+    if (localConfig?.isCustom && localConfig?.sheetUrl) {
+      syncCustomSheetUrl(localConfig.sheetUrl).then((syncRes) => {
+        if (syncRes.success && syncRes.records && syncRes.records.length > 0) {
+          saveLocalRecords(syncRes.records);
+          saveLocalConfig(syncRes.config);
+        }
+      }).catch(() => {});
     }
+    return {
+      config: localConfig || DEFAULT_SHEET_CONFIG,
+      records: localRecords,
+    };
   }
 
   try {
@@ -72,15 +76,13 @@ export async function fetchSheetData(): Promise<{ config: SheetConfig; records: 
       }
 
       if (data) {
-        // If server has custom synced records or server data, sync local storage & use server records
         if (data.config?.isCustom && data.records && data.records.length > 0) {
           saveLocalRecords(data.records);
           saveLocalConfig(data.config);
           return { config: data.config, records: data.records };
         }
 
-        const localRecs = getLocalRecords();
-        const recordsToUse = localRecs || data.records || MOCK_HOUSING_RECORDS;
+        const recordsToUse = data.records || MOCK_HOUSING_RECORDS;
         const configToUse = localConfig || data.config || DEFAULT_SHEET_CONFIG;
         return { config: configToUse, records: recordsToUse };
       }
@@ -89,10 +91,9 @@ export async function fetchSheetData(): Promise<{ config: SheetConfig; records: 
     console.warn('Backend API unavailable, using fallback mock data:', err);
   }
 
-  const localRecs = getLocalRecords();
   return {
     config: localConfig || DEFAULT_SHEET_CONFIG,
-    records: localRecs || MOCK_HOUSING_RECORDS,
+    records: MOCK_HOUSING_RECORDS,
   };
 }
 
