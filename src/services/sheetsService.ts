@@ -209,7 +209,6 @@ export function getEmployeeSummary(employeeId: string, records: HousingAllowance
 
   const totalAmount = matchedRecords.reduce((sum, r) => sum + (r.amount || 0), 0);
   const submittedCount = matchedRecords.filter((r) => r.billStatus === 'ส่งแล้ว').length;
-  const pendingCount = matchedRecords.filter((r) => r.billStatus === 'รอดำเนินการ').length;
   const unsubmittedCount = matchedRecords.filter((r) => r.billStatus === 'ยังไม่ส่ง').length;
   const overdueCount = matchedRecords.filter((r) => r.billStatus === 'เกินกำหนด').length;
 
@@ -222,7 +221,6 @@ export function getEmployeeSummary(employeeId: string, records: HousingAllowance
     records: matchedRecords.sort((a, b) => parseDateToTimestamp(b.transferDate) - parseDateToTimestamp(a.transferDate)),
     totalAmount,
     submittedCount,
-    pendingCount,
     unsubmittedCount,
     overdueCount,
   };

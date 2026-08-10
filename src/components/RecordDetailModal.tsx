@@ -95,11 +95,6 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> ส่งแล้ว
                 </span>
               )}
-              {record.billStatus === 'รอดำเนินการ' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-xs font-semibold shadow-2xs">
-                  <Clock className="w-3.5 h-3.5 text-sky-600" /> รอดำเนินการ
-                </span>
-              )}
               {record.billStatus === 'ยังไม่ส่ง' && (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold shadow-2xs">
                   <XCircle className="w-3.5 h-3.5 text-rose-600" /> ยังไม่ส่ง

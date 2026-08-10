@@ -1,4 +1,4 @@
-export type BillStatus = 'ส่งแล้ว' | 'ยังไม่ส่ง' | 'รอดำเนินการ' | 'เกินกำหนด';
+export type BillStatus = 'ส่งแล้ว' | 'ยังไม่ส่ง' | 'เกินกำหนด';
 
 export interface HousingAllowanceRecord {
   id: string;
@@ -28,7 +28,6 @@ export interface EmployeeInfo {
   records: HousingAllowanceRecord[];
   totalAmount: number;
   submittedCount: number;
-  pendingCount: number;
   unsubmittedCount: number;
   overdueCount: number;
 }

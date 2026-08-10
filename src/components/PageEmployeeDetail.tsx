@@ -61,13 +61,6 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
             <span>ส่งแล้ว</span>
           </span>
         );
-      case 'รอดำเนินการ':
-        return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200 text-xs font-semibold shadow-2xs">
-            <Clock className="w-3.5 h-3.5 text-sky-600" />
-            <span>รอดำเนินการ</span>
-          </span>
-        );
       case 'เกินกำหนด':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-semibold shadow-2xs">
@@ -120,15 +113,7 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
       </div>
 
       {/* Summary Badges Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-        
-        <div className="p-4 rounded-2xl bg-sky-50/80 border border-sky-200 flex items-center justify-between shadow-2xs">
-          <div>
-            <div className="text-xs text-sky-800 font-medium">รอดำเนินการ</div>
-            <div className="text-xl font-bold text-sky-900 mt-0.5">{employeeInfo.pendingCount} รายการ</div>
-          </div>
-          <Clock className="w-8 h-8 text-sky-500/50" />
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
 
         <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 flex items-center justify-between shadow-2xs">
           <div>
@@ -188,7 +173,7 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
 
             {/* Filter Status */}
             <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 text-xs">
-              {['ทั้งหมด', 'รอดำเนินการ', 'ส่งแล้ว', 'ยังไม่ส่ง', 'เกินกำหนด'].map((st) => (
+              {['ทั้งหมด', 'ส่งแล้ว', 'ยังไม่ส่ง', 'เกินกำหนด'].map((st) => (
                 <button
                   key={st}
                   onClick={() => setSelectedStatus(st)}

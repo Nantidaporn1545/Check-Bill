@@ -21,12 +21,12 @@ export function normalizeColumnKey(key: string): string {
   return clean;
 }
 
-// Normalize Bill Status to standard 4 Thai types
+// Normalize Bill Status to standard Thai types
 export function normalizeBillStatus(rawStatus: string): BillStatus {
   if (!rawStatus) return 'ยังไม่ส่ง';
   const str = String(rawStatus).trim();
 
-  if (str === 'ส่งแล้ว' || str === 'ยังไม่ส่ง' || str === 'รอดำเนินการ' || str === 'เกินกำหนด') {
+  if (str === 'ส่งแล้ว' || str === 'ยังไม่ส่ง' || str === 'เกินกำหนด') {
     return str as BillStatus;
   }
 
@@ -49,18 +49,6 @@ export function normalizeBillStatus(rawStatus: string): BillStatus {
     lower.includes('success')
   ) {
     return 'ส่งแล้ว';
-  }
-
-  if (
-    str.includes('รอ') ||
-    str.includes('ดำเนินการ') ||
-    str.includes('ตรวจ') ||
-    str.includes('กำลัง') ||
-    lower.includes('pending') ||
-    lower.includes('process') ||
-    lower.includes('waiting')
-  ) {
-    return 'รอดำเนินการ';
   }
 
   if (

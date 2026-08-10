@@ -116,9 +116,9 @@ export default function App() {
 
   // Submit receipt upload / update bill status
   const handleSubmitReceipt = (recordId: string, receiptUrl: string, note: string) => {
-    const updated = updateRecordBillStatus(records, recordId, 'รอดำเนินการ', receiptUrl, note);
+    const updated = updateRecordBillStatus(records, recordId, 'ส่งแล้ว', receiptUrl, note);
     setRecords(updated);
-    showToast('ส่งใบเสร็จเรียบร้อยแล้ว สถานะเปลี่ยนเป็น "รอดำเนินการ"');
+    showToast('ส่งใบเสร็จเรียบร้อยแล้ว สถานะเปลี่ยนเป็น "ส่งแล้ว"');
   };
 
   // Current employee summary for Page 2

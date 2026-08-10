@@ -104,7 +104,7 @@ export const ReceiptUploadModal: React.FC<ReceiptUploadModalProps> = ({
             <div className="py-8 text-center space-y-3">
               <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto animate-bounce" />
               <h4 className="text-lg font-bold text-slate-900">นำส่งใบเสร็จเรียบร้อยแล้ว!</h4>
-              <p className="text-xs text-slate-500">ระบบเปลี่ยนสถานะเป็น "รอดำเนินการ" และบันทึกข้อมูลแล้ว</p>
+              <p className="text-xs text-slate-500">ระบบเปลี่ยนสถานะเป็น "ส่งแล้ว" และบันทึกข้อมูลแล้ว</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
