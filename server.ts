@@ -209,6 +209,29 @@ app.post('/api/sheets/reset', (req, res) => {
   });
 });
 
+// API: Update record bill status or receipt
+app.post('/api/sheets/update-record', (req, res) => {
+  try {
+    const { recordId, newStatus, receiptUrl, note } = req.body;
+    cachedRecords = cachedRecords.map((r) => {
+      if (r.id === recordId) {
+        return {
+          ...r,
+          billStatus: newStatus || r.billStatus,
+          receiptUrl: receiptUrl !== undefined ? receiptUrl : r.receiptUrl,
+          note: note !== undefined ? note : r.note,
+          lastUpdated: new Date().toISOString(),
+        };
+      }
+      return r;
+    });
+    saveStateToDisk();
+    res.json({ success: true, records: cachedRecords });
+  } catch (err: any) {
+    res.status(500).json({ error: err?.message || 'Failed to update record' });
+  }
+});
+
 // API: Download Sample CSV Template
 app.get('/api/sheets/sample-csv', (req, res) => {
   const sampleCsvText = `วันที่โอน,รายการ,รหัสพนักงาน,ผู้เบิก(ชื่อพนักงาน),เลขทะเบียนรถ(บางรายการที่เบิกค่าน้ำมัน),ไซต์งาน,จำนวนเงินที่โอน,สถานะบิล

@@ -202,13 +202,13 @@ export function getEmployeeSummary(employeeId: string, records: HousingAllowance
 }
 
 // Update a record's bill status (e.g. when uploading a receipt)
-export function updateRecordBillStatus(
+export async function updateRecordBillStatus(
   records: HousingAllowanceRecord[],
   recordId: string,
   newStatus: HousingAllowanceRecord['billStatus'],
   receiptUrl?: string,
   note?: string
-): HousingAllowanceRecord[] {
+): Promise<HousingAllowanceRecord[]> {
   const updated = records.map((r) => {
     if (r.id === recordId) {
       return {
@@ -223,5 +223,16 @@ export function updateRecordBillStatus(
   });
 
   saveLocalRecords(updated);
+
+  try {
+    await fetch('/api/sheets/update-record', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recordId, newStatus, receiptUrl, note }),
+    });
+  } catch (e) {
+    console.warn('Failed to sync record update to server:', e);
+  }
+
   return updated;
 }
