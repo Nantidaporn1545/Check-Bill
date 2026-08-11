@@ -134,6 +134,32 @@ export async function syncCustomSheetUrl(sheetUrl: string, csvText?: string): Pr
     saveLocalRecords(records);
     saveLocalConfig(newConfig);
 
+    // Sync client-side parsed CSV data to server so that all other users can access it immediately
+    try {
+      console.log('Syncing client-parsed CSV back to server...');
+      const response = await fetch('/api/sheets/parse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sheetUrl, csvText: rawCsv }),
+      });
+      const contentType = response.headers.get('content-type');
+      if (response.ok && contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        if (data && data.records) {
+          saveLocalRecords(data.records);
+          if (data.config) saveLocalConfig(data.config);
+          return {
+            success: true,
+            config: data.config,
+            records: data.records,
+            message: `เชื่อมต่อสำเร็จและบันทึกข้อมูลส่วนกลางเรียบร้อย (ดึงข้อมูลพนักงาน ${data.records.length} รายการ)`,
+          };
+        }
+      }
+    } catch (serverSyncErr) {
+      console.warn('Failed to upload parsed CSV to server database:', serverSyncErr);
+    }
+
     return {
       success: true,
       config: newConfig,

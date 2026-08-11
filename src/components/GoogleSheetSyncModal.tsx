@@ -111,53 +111,53 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-white border border-slate-200/80 rounded-3xl max-w-xl w-full text-slate-700 shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-fadeIn">
+      <div className="bg-[#0e2a3b] border border-[#1A475F]/50 rounded-3xl max-w-xl w-full text-[#D3D1C6] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/80">
+        <div className="px-6 py-4 border-b border-[#1A475F]/30 flex items-center justify-between bg-[#103042]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center">
-              <FileSpreadsheet className="w-5 h-5 text-sky-600" />
+            <div className="w-10 h-10 rounded-2xl bg-[#1A475F]/40 border border-[#7FA1B6]/30 text-[#7FA1B6] flex items-center justify-center">
+              <FileSpreadsheet className="w-5 h-5 text-[#7FA1B6]" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-slate-900">เชื่อมต่อดึงข้อมูล Google Sheet</h3>
-              <p className="text-xs text-slate-500">เชื่อมต่อตารางข้อมูลสวัสดิการค่าที่พักพนักงานแบบเรียลไทม์</p>
+              <h3 className="font-bold text-lg text-[#FFFFFF]">เชื่อมต่อดึงข้อมูล Google Sheet</h3>
+              <p className="text-xs text-[#7FA1B6]">เชื่อมต่อตารางข้อมูลสวัสดิการค่าที่พักพนักงานแบบเรียลไทม์</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+            className="p-2 text-[#7FA1B6] hover:text-[#FFFFFF] hover:bg-[#1A475F]/40 rounded-xl transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Status Bar */}
-        <div className="bg-slate-50 px-6 py-3 border-b border-slate-200 flex items-center justify-between text-xs">
+        <div className="bg-[#0c2331] px-6 py-3 border-b border-[#1A475F]/30 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-slate-500">สถานะปัจจุบัน:</span>
-            <strong className="text-slate-900">
+            <span className="text-[#7FA1B6]">สถานะปัจจุบัน:</span>
+            <strong className="text-[#FFFFFF]">
               {config.isCustom ? 'เชื่อมต่อ Google Sheet ของคุณแล้ว' : 'ใช้ข้อมูลตัวอย่างระบบ'}
             </strong>
           </div>
-          <div className="font-mono text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200 font-semibold">
+          <div className="font-mono text-[#FFFFFF] bg-[#1A475F]/50 px-2.5 py-0.5 rounded-full border border-[#7FA1B6]/30 font-semibold">
             {totalRecordsCount} รายการ
           </div>
         </div>
 
         {/* Tab Selection */}
-        <div className="flex border-b border-slate-200 bg-slate-50/50 px-6 pt-3 gap-2 text-xs font-medium">
+        <div className="flex border-b border-[#1A475F]/30 bg-[#103042]/50 px-6 pt-3 gap-2 text-xs font-medium">
           <button
             onClick={() => setActiveTab('url')}
             className={`pb-3 px-3 flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
               activeTab === 'url'
-                ? 'border-sky-600 text-sky-600 font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#7FA1B6] text-[#FFFFFF] font-bold'
+                : 'border-transparent text-[#7FA1B6] hover:text-[#FFFFFF]'
             }`}
           >
-            <Link2 className="w-4 h-4 text-sky-600" />
+            <Link2 className="w-4 h-4 text-[#7FA1B6]" />
             <span>เชื่อมด้วย URL Google Sheet</span>
           </button>
 
@@ -165,11 +165,11 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({
             onClick={() => setActiveTab('csv')}
             className={`pb-3 px-3 flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
               activeTab === 'csv'
-                ? 'border-sky-600 text-sky-600 font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#7FA1B6] text-[#FFFFFF] font-bold'
+                : 'border-transparent text-[#7FA1B6] hover:text-[#FFFFFF]'
             }`}
           >
-            <FileText className="w-4 h-4 text-sky-600" />
+            <FileText className="w-4 h-4 text-[#7FA1B6]" />
             <span>วางข้อความ / อัปโหลด CSV</span>
           </button>
 
@@ -177,27 +177,27 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({
             onClick={() => setActiveTab('help')}
             className={`pb-3 px-3 flex items-center gap-1.5 border-b-2 transition-colors cursor-pointer ${
               activeTab === 'help'
-                ? 'border-sky-600 text-sky-600 font-bold'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#7FA1B6] text-[#FFFFFF] font-bold'
+                : 'border-transparent text-[#7FA1B6] hover:text-[#FFFFFF]'
             }`}
           >
-            <HelpCircle className="w-4 h-4 text-sky-600" />
+            <HelpCircle className="w-4 h-4 text-[#7FA1B6]" />
             <span>วิธีเปิดสิทธิ์แชร์</span>
           </button>
         </div>
 
         {/* Main Body */}
-        <div className="p-6 overflow-y-auto space-y-5 flex-1">
+        <div className="p-6 overflow-y-auto space-y-5 flex-1 bg-[#0e2a3b]">
 
           {errorMsg && (
-            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-2xl bg-rose-950/40 border border-rose-500/40 text-rose-200 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2.5">
+            <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-200 text-xs flex items-center gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>{successMsg}</span>
             </div>
@@ -245,7 +245,7 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-5 py-2.5 rounded-xl bg-[#103042] hover:bg-[#13384D] text-[#FFFFFF] border border-[#7FA1B6]/60 font-semibold text-xs shadow-lg flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#1A475F] hover:bg-[#205775] text-[#FFFFFF] border border-[#7FA1B6]/50 font-semibold text-xs shadow-lg flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 text-[#7FA1B6] ${isLoading ? 'animate-spin' : ''}`} />
                   <span>{isLoading ? 'กำลังดึงข้อมูล...' : 'ดึงข้อมูล Google Sheet'}</span>
@@ -288,7 +288,7 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-5 py-2.5 rounded-xl bg-[#103042] hover:bg-[#13384D] text-[#FFFFFF] border border-[#7FA1B6]/60 font-semibold text-xs shadow-lg flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#1A475F] hover:bg-[#205775] text-[#FFFFFF] border border-[#7FA1B6]/50 font-semibold text-xs shadow-lg flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 text-[#7FA1B6] ${isLoading ? 'animate-spin' : ''}`} />
                   <span>{isLoading ? 'กำลังประมวลผล...' : 'นำเข้าข้อมูล CSV'}</span>
@@ -328,7 +328,7 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({
         </div>
 
         {/* Footer Reset & Actions */}
-        <div className="px-6 py-4 border-t border-[#7FA1B6]/30 bg-[#103042] flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-[#1A475F]/30 bg-[#103042] flex items-center justify-between">
           <button
             onClick={handleResetData}
             className="text-xs text-[#7FA1B6] hover:text-rose-300 transition-colors flex items-center gap-1.5 cursor-pointer"
@@ -338,7 +338,7 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({
 
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-[#0c2331] hover:bg-[#1A475F] text-[#D3D1C6] hover:text-[#FFFFFF] text-xs font-medium transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-[#0c2331] hover:bg-[#1A475F]/50 text-[#D3D1C6] hover:text-[#FFFFFF] text-xs font-medium border border-[#1A475F]/40 transition-colors cursor-pointer"
           >
             ปิดหน้าต่าง
           </button>
