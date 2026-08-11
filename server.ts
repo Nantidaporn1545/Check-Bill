@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import Papa from 'papaparse';
 import { MOCK_HOUSING_RECORDS, DEFAULT_SHEET_CONFIG } from './src/data/mockData.js';
@@ -18,9 +19,48 @@ const PORT = 3000;
 
 app.use(express.json({ limit: '10mb' }));
 
-// Memory cache for parsed custom sheet records
+const STORE_FILE = path.join(process.cwd(), 'data', 'storedState.json');
+
+// Ensure data dir exists
+if (!fs.existsSync(path.join(process.cwd(), 'data'))) {
+  try {
+    fs.mkdirSync(path.join(process.cwd(), 'data'), { recursive: true });
+  } catch (e) {
+    console.warn('Could not create data dir:', e);
+  }
+}
+
+// Memory cache & persistent storage for records and config
 let cachedRecords: HousingAllowanceRecord[] = [...MOCK_HOUSING_RECORDS];
 let currentSheetConfig = { ...DEFAULT_SHEET_CONFIG };
+
+// Load state from disk if exists
+try {
+  if (fs.existsSync(STORE_FILE)) {
+    const raw = fs.readFileSync(STORE_FILE, 'utf-8');
+    const parsed = JSON.parse(raw);
+    if (parsed.records && Array.isArray(parsed.records) && parsed.records.length > 0) {
+      cachedRecords = parsed.records;
+    }
+    if (parsed.config) {
+      currentSheetConfig = parsed.config;
+    }
+  }
+} catch (e) {
+  console.warn('Failed to load stored state file:', e);
+}
+
+function saveStateToDisk() {
+  try {
+    fs.writeFileSync(STORE_FILE, JSON.stringify({
+      config: currentSheetConfig,
+      records: cachedRecords,
+      updatedAt: new Date().toISOString()
+    }, null, 2));
+  } catch (e) {
+    console.warn('Failed to save state to disk:', e);
+  }
+}
 
 // Fetch CSV with multi-candidate fallbacks
 async function fetchCsvFromGoogleSheet(sheetUrl: string): Promise<string | null> {
@@ -62,6 +102,7 @@ async function fetchLatestFromGoogleSheet(sheetUrl: string): Promise<HousingAllo
       cachedRecords = newRecords;
       currentSheetConfig.lastSyncTime = new Date().toISOString();
       currentSheetConfig.status = 'connected';
+      saveStateToDisk();
       return newRecords;
     }
   } catch (e) {
@@ -75,11 +116,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// API: Get current records & sheet config (Live fetches Google Sheet if connected)
+// API: Get current records & sheet config (Live fetches Google Sheet if connected, falls back to cached records if live fetch fails)
 app.get('/api/sheets/data', async (req, res) => {
   if (currentSheetConfig.isCustom && currentSheetConfig.sheetUrl) {
     const liveRecords = await fetchLatestFromGoogleSheet(currentSheetConfig.sheetUrl);
-    if (liveRecords) {
+    if (liveRecords && liveRecords.length > 0) {
       return res.json({
         config: currentSheetConfig,
         records: liveRecords,
@@ -129,7 +170,7 @@ app.post('/api/sheets/parse', async (req, res) => {
       return res.status(400).json({ error: 'ไม่สามารถอ่านโครงสร้าง CSV หรือไม่พบแถวข้อมูล' });
     }
 
-    // Update state
+    // Update state & persist to disk
     cachedRecords = newRecords;
     currentSheetConfig = {
       sheetUrl: sheetUrl || currentSheetConfig.sheetUrl,
@@ -139,6 +180,7 @@ app.post('/api/sheets/parse', async (req, res) => {
       lastSyncTime: new Date().toISOString(),
       status: 'connected',
     };
+    saveStateToDisk();
 
     return res.json({
       success: true,
@@ -158,6 +200,7 @@ app.post('/api/sheets/parse', async (req, res) => {
 app.post('/api/sheets/reset', (req, res) => {
   cachedRecords = [...MOCK_HOUSING_RECORDS];
   currentSheetConfig = { ...DEFAULT_SHEET_CONFIG, lastSyncTime: new Date().toISOString() };
+  saveStateToDisk();
   res.json({
     success: true,
     message: 'รีเซ็ตข้อมูลเป็นชุดตัวอย่างมาตรฐานเรียบร้อย',

@@ -62,8 +62,8 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onNavigateHome}
             className="flex items-center gap-3 cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 shadow-xs group-hover:scale-105 group-hover:bg-sky-100 transition-all">
-              <Building2 className="w-5 h-5 text-sky-600" />
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 border border-sky-400/30 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition-all">
+              <Building2 className="w-5 h-5" />
             </div>
             <div>
               <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-tight flex items-center gap-2">

@@ -43,43 +43,32 @@ export function getLocalConfig(): SheetConfig | null {
 
 // Fetch all records & sheet config from API
 export async function fetchSheetData(): Promise<{ config: SheetConfig; records: HousingAllowanceRecord[] }> {
+  try {
+    const response = await fetch('/api/sheets/data');
+    const contentType = response.headers.get('content-type');
+    if (response.ok && contentType && contentType.includes('application/json')) {
+      const data = await response.json();
+      if (data && data.records && data.records.length > 0) {
+        saveLocalRecords(data.records);
+        if (data.config) saveLocalConfig(data.config);
+        return {
+          config: data.config || DEFAULT_SHEET_CONFIG,
+          records: data.records,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('Backend API unavailable, falling back to local storage:', err);
+  }
+
   const localRecords = getLocalRecords();
   const localConfig = getLocalConfig();
 
-  // If local storage already has records, use them to preserve exact lastSyncTime from upload/sync
   if (localRecords && localRecords.length > 0) {
     return {
       config: localConfig || DEFAULT_SHEET_CONFIG,
       records: localRecords,
     };
-  }
-
-  try {
-    const response = await fetch('/api/sheets/data');
-    const contentType = response.headers.get('content-type');
-    if (response.ok && contentType && contentType.includes('application/json')) {
-      let data;
-      try {
-        data = await response.json();
-      } catch (jsonErr) {
-        console.warn('Failed to parse JSON from /api/sheets/data:', jsonErr);
-        data = null;
-      }
-
-      if (data) {
-        if (data.config?.isCustom && data.records && data.records.length > 0) {
-          saveLocalRecords(data.records);
-          saveLocalConfig(data.config);
-          return { config: data.config, records: data.records };
-        }
-
-        const recordsToUse = data.records || MOCK_HOUSING_RECORDS;
-        const configToUse = localConfig || data.config || DEFAULT_SHEET_CONFIG;
-        return { config: configToUse, records: recordsToUse };
-      }
-    }
-  } catch (err) {
-    console.warn('Backend API unavailable, using fallback mock data:', err);
   }
 
   return {
