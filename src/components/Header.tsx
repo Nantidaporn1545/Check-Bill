@@ -1,5 +1,7 @@
 import React from 'react';
-import { Building2, RefreshCw, ArrowLeft, FileSpreadsheet, ShieldCheck, Lock, LogOut } from 'lucide-react';
+import { Building2, RefreshCw, ArrowLeft, FileSpreadsheet, ShieldCheck, Lock, LogOut, Clock } from 'lucide-react';
+import { SheetConfig } from '../types';
+import { formatThaiBEDate } from '../utils/formatters';
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -11,6 +13,7 @@ interface HeaderProps {
   isAdmin: boolean;
   onOpenAdminAuthModal: () => void;
   onAdminLogout: () => void;
+  sheetConfig?: SheetConfig;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -23,9 +26,23 @@ export const Header: React.FC<HeaderProps> = ({
   isAdmin,
   onOpenAdminAuthModal,
   onAdminLogout,
+  sheetConfig,
 }) => {
+  const formatLastSync = (isoString?: string | null) => {
+    if (!isoString) return 'วันนี้';
+    try {
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return isoString;
+      const dateStr = formatThaiBEDate(d.toISOString());
+      const timeStr = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+      return `${dateStr} (${timeStr} น.)`;
+    } catch {
+      return isoString;
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 text-slate-800 shadow-xs transition-all">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 text-slate-800 shadow-xs transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
         {/* Brand & Title */}
@@ -59,9 +76,17 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Action Controls & Last Sync Time at Top Right */}
+        <div className="flex items-center gap-3">
           
+          {sheetConfig?.lastSyncTime && (
+            <div className="hidden xl:flex items-center gap-1.5 text-xs text-slate-600 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
+              <Clock className="w-3.5 h-3.5 text-sky-600" />
+              <span className="font-medium">อัปเดต Google Sheet ล่าสุด:</span>
+              <span className="font-bold text-slate-900">{formatLastSync(sheetConfig.lastSyncTime)}</span>
+            </div>
+          )}
+
           {/* Admin Mode Controls */}
           {isAdmin ? (
             <div className="flex items-center gap-2">

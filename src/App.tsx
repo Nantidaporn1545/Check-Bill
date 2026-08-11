@@ -146,6 +146,7 @@ export default function App() {
         isAdmin={isAdmin}
         onOpenAdminAuthModal={() => setIsAdminAuthModalOpen(true)}
         onAdminLogout={handleAdminLogout}
+        sheetConfig={sheetConfig}
       />
 
       {/* Main Page Area */}
