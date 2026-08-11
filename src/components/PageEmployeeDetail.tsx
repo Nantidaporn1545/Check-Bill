@@ -214,8 +214,7 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
               <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 text-xs font-semibold uppercase tracking-wider">
                 <th className="py-3.5 px-4 sm:px-6">วันที่โอน</th>
                 <th className="py-3.5 px-4 sm:px-6">รายการ</th>
-                <th className="py-3.5 px-4 sm:px-6">เลขทะเบียนรถ</th>
-                <th className="py-3.5 px-4 sm:px-6">ไซต์งาน</th>
+                <th className="py-3.5 px-4 sm:px-6">ไซต์งาน / ทะเบียนรถ</th>
                 <th className="py-3.5 px-4 sm:px-6 text-right">จำนวนเงินที่โอน</th>
                 <th className="py-3.5 px-4 sm:px-6 text-center">สถานะบิล</th>
               </tr>
@@ -223,7 +222,7 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
             <tbody className="divide-y divide-slate-100 text-sm">
               {filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500">
+                  <td colSpan={5} className="py-12 text-center text-slate-500">
                     <p className="text-base font-medium">ไม่พบรายการที่ตรงกับเงื่อนไขการค้นหา</p>
                     <p className="text-xs mt-1 text-slate-400">ลองเปลี่ยนตัวกรองสถานะหรือลบข้อความค้นหา</p>
                   </td>
@@ -253,22 +252,21 @@ export const PageEmployeeDetail: React.FC<PageEmployeeDetailProps> = ({
                       )}
                     </td>
 
-                    {/* เลขทะเบียนรถ */}
-                    <td className="py-4 px-4 sm:px-6 text-slate-600 text-xs whitespace-nowrap">
-                      {record.vehiclePlate ? (
-                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-800 font-mono text-xs font-semibold">
-                          🚗 {record.vehiclePlate}
-                        </span>
-                      ) : (
-                        <span className="text-slate-300">-</span>
-                      )}
-                    </td>
-
-                    {/* ไซต์งาน */}
+                    {/* ไซต์งาน / ทะเบียนรถ */}
                     <td className="py-4 px-4 sm:px-6 text-slate-600">
-                      <div className="flex items-center gap-1.5">
-                        <Building2 className="w-3.5 h-3.5 text-sky-500 shrink-0" />
-                        <span className="text-xs">{record.siteLocation}</span>
+                      <div className="space-y-1">
+                        {(!record.vehiclePlate || (record.siteLocation && record.siteLocation !== 'ไซต์งานทั่วไป')) && (
+                          <div className="flex items-center gap-1.5">
+                            <Building2 className="w-3.5 h-3.5 text-sky-500 shrink-0" />
+                            <span className="text-xs font-medium text-slate-900">{record.siteLocation}</span>
+                          </div>
+                        )}
+                        {record.vehiclePlate && (
+                          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 font-mono text-[11px] font-semibold">
+                            <span>🚗</span>
+                            <span>{record.vehiclePlate}</span>
+                          </div>
+                        )}
                       </div>
                     </td>
 

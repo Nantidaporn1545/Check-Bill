@@ -46,21 +46,7 @@ export async function fetchSheetData(): Promise<{ config: SheetConfig; records: 
   const localRecords = getLocalRecords();
   const localConfig = getLocalConfig();
 
-  // If there's a custom sheet URL configured, attempt to sync directly first to ensure live latest data from Google Sheet
-  if (localConfig?.isCustom && localConfig?.sheetUrl) {
-    try {
-      const syncRes = await syncCustomSheetUrl(localConfig.sheetUrl);
-      if (syncRes.success && syncRes.records && syncRes.records.length > 0) {
-        saveLocalRecords(syncRes.records);
-        saveLocalConfig(syncRes.config);
-        return { config: syncRes.config, records: syncRes.records };
-      }
-    } catch (e) {
-      console.warn('Direct Google Sheet auto-resync failed, using cached local records if available:', e);
-    }
-  }
-
-  // If local storage already has custom synced records, use them
+  // If local storage already has records, use them to preserve exact lastSyncTime from upload/sync
   if (localRecords && localRecords.length > 0) {
     return {
       config: localConfig || DEFAULT_SHEET_CONFIG,

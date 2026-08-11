@@ -5,7 +5,7 @@ export const DEFAULT_SHEET_CONFIG: SheetConfig = {
   sheetId: '1HousingAllowanceSample2026',
   sheetName: 'ประวัติการเบิกสวัสดิการ',
   isCustom: false,
-  lastSyncTime: new Date().toISOString(),
+  lastSyncTime: '2026-08-01T08:00:00.000Z',
   status: 'connected',
 };
 

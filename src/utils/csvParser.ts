@@ -117,7 +117,7 @@ export function parseCsvToRecords(rawCsv: string): HousingAllowanceRecord[] {
       position: normalizedRow['position'] || 'พนักงาน',
       transferDate: transferDateVal,
       welfareItem: normalizedRow['welfareItem'] || 'ค่าที่พักประจำเดือน',
-      siteLocation: normalizedRow['siteLocation'] || 'ไซต์งานทั่วไป',
+      siteLocation: normalizedRow['siteLocation'] || (normalizedRow['vehiclePlate'] ? '' : 'ไซต์งานทั่วไป'),
       vehiclePlate: normalizedRow['vehiclePlate'] || '',
       amount: amountVal,
       billStatus: status,

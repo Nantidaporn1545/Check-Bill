@@ -76,9 +76,11 @@ export const RecordDetailModal: React.FC<RecordDetailModalProps> = ({
               </div>
               <div className="text-sm font-semibold text-slate-900">{record.welfareItem}</div>
               <div className="text-xs text-sky-700 mt-1 flex items-center justify-between">
-                <span>{record.siteLocation}</span>
+                {(!record.vehiclePlate || (record.siteLocation && record.siteLocation !== 'ไซต์งานทั่วไป')) && (
+                  <span>{record.siteLocation}</span>
+                )}
                 {record.vehiclePlate && (
-                  <span className="font-mono text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  <span className={`font-mono text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 ${(!record.vehiclePlate || (record.siteLocation && record.siteLocation !== 'ไซต์งานทั่วไป')) ? '' : 'ml-auto'}`}>
                     🚗 ทะเบียน: {record.vehiclePlate}
                   </span>
                 )}
