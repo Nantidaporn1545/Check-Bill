@@ -118,9 +118,28 @@ app.get('/api/health', (req, res) => {
 
 // API: Get current records & sheet config (Live fetches Google Sheet if connected, falls back to cached records if live fetch fails)
 app.get('/api/sheets/data', async (req, res) => {
+  try {
+    if (fs.existsSync(STORE_FILE)) {
+      const raw = fs.readFileSync(STORE_FILE, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed.records && Array.isArray(parsed.records) && parsed.records.length > 0) {
+        cachedRecords = parsed.records;
+      }
+      if (parsed.config) {
+        currentSheetConfig = parsed.config;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to reload state from disk in /api/sheets/data:', e);
+  }
+
   if (currentSheetConfig.isCustom && currentSheetConfig.sheetUrl) {
     const liveRecords = await fetchLatestFromGoogleSheet(currentSheetConfig.sheetUrl);
     if (liveRecords && liveRecords.length > 0) {
+      cachedRecords = liveRecords;
+      currentSheetConfig.lastSyncTime = new Date().toISOString();
+      currentSheetConfig.status = 'connected';
+      saveStateToDisk();
       return res.json({
         config: currentSheetConfig,
         records: liveRecords,
