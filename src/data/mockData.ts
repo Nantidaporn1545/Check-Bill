@@ -1,11 +1,11 @@
 import { HousingAllowanceRecord, SheetConfig } from '../types';
 
 export const DEFAULT_SHEET_CONFIG: SheetConfig = {
-  sheetUrl: 'https://docs.google.com/spreadsheets/d/1HousingAllowanceSample2026/edit#gid=0',
-  sheetId: '1HousingAllowanceSample2026',
+  sheetUrl: 'https://docs.google.com/spreadsheets/d/1FIcoZCCl1ofdPYgABq4KfBI7QKjMNnLYFSmM_S63rik/edit?usp=sharing',
+  sheetId: '1FIcoZCCl1ofdPYgABq4KfBI7QKjMNnLYFSmM_S63rik',
   sheetName: 'ประวัติการเบิกสวัสดิการ',
-  isCustom: false,
-  lastSyncTime: '2026-08-01T08:00:00.000Z',
+  isCustom: true,
+  lastSyncTime: new Date().toISOString(),
   status: 'connected',
 };
 

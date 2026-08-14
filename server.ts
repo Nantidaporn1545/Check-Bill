@@ -34,22 +34,6 @@ if (!fs.existsSync(path.join(process.cwd(), 'data'))) {
 let cachedRecords: HousingAllowanceRecord[] = [...MOCK_HOUSING_RECORDS];
 let currentSheetConfig = { ...DEFAULT_SHEET_CONFIG };
 
-// Load state from disk if exists
-try {
-  if (fs.existsSync(STORE_FILE)) {
-    const raw = fs.readFileSync(STORE_FILE, 'utf-8');
-    const parsed = JSON.parse(raw);
-    if (parsed.records && Array.isArray(parsed.records) && parsed.records.length > 0) {
-      cachedRecords = parsed.records;
-    }
-    if (parsed.config) {
-      currentSheetConfig = parsed.config;
-    }
-  }
-} catch (e) {
-  console.warn('Failed to load stored state file:', e);
-}
-
 function saveStateToDisk() {
   try {
     fs.writeFileSync(STORE_FILE, JSON.stringify({
@@ -61,6 +45,33 @@ function saveStateToDisk() {
     console.warn('Failed to save state to disk:', e);
   }
 }
+
+function loadStateFromDisk() {
+  try {
+    if (fs.existsSync(STORE_FILE)) {
+      const raw = fs.readFileSync(STORE_FILE, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed.records && Array.isArray(parsed.records) && parsed.records.length > 0) {
+        cachedRecords = parsed.records;
+      }
+      if (parsed.config) {
+        currentSheetConfig = parsed.config;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load stored state file:', e);
+  }
+
+  // Force alignment to user's requested Google Sheet
+  if (!currentSheetConfig || currentSheetConfig.sheetUrl !== DEFAULT_SHEET_CONFIG.sheetUrl) {
+    console.log(`Enforcing alignment to target Google Sheet config: ${DEFAULT_SHEET_CONFIG.sheetUrl}`);
+    currentSheetConfig = { ...DEFAULT_SHEET_CONFIG };
+    saveStateToDisk();
+  }
+}
+
+// Initial state load
+loadStateFromDisk();
 
 // Fetch CSV with multi-candidate fallbacks
 async function fetchCsvFromGoogleSheet(sheetUrl: string): Promise<string | null> {
@@ -118,20 +129,7 @@ app.get('/api/health', (req, res) => {
 
 // API: Get current records & sheet config (Live fetches Google Sheet if connected, falls back to cached records if live fetch fails)
 app.get('/api/sheets/data', async (req, res) => {
-  try {
-    if (fs.existsSync(STORE_FILE)) {
-      const raw = fs.readFileSync(STORE_FILE, 'utf-8');
-      const parsed = JSON.parse(raw);
-      if (parsed.records && Array.isArray(parsed.records) && parsed.records.length > 0) {
-        cachedRecords = parsed.records;
-      }
-      if (parsed.config) {
-        currentSheetConfig = parsed.config;
-      }
-    }
-  } catch (e) {
-    console.warn('Failed to reload state from disk in /api/sheets/data:', e);
-  }
+  loadStateFromDisk();
 
   if (currentSheetConfig.isCustom && currentSheetConfig.sheetUrl) {
     const liveRecords = await fetchLatestFromGoogleSheet(currentSheetConfig.sheetUrl);

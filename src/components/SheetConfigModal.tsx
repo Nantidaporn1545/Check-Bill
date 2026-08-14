@@ -57,7 +57,7 @@ export const SheetConfigModal: React.FC<SheetConfigModalProps> = ({
 
   const sampleCsvUrl = '/api/sheets/sample-csv';
 
-  const sampleSheetUrlDemo = 'https://docs.google.com/spreadsheets/d/1HousingAllowanceSample2026/edit#gid=0';
+  const sampleSheetUrlDemo = 'https://docs.google.com/spreadsheets/d/1FIcoZCCl1ofdPYgABq4KfBI7QKjMNnLYFSmM_S63rik/edit?usp=sharing';
 
   const copySampleLink = () => {
     navigator.clipboard.writeText(sampleSheetUrlDemo);
